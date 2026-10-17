@@ -1,0 +1,141 @@
+/* ================================
+   COOKLY COLOR VARIABLES
+   ================================ */
+
+:root {
+  --primary-green: #1f5c42;
+  --dark-green: #174532;
+  --accent-orange: #e97b39;
+  --cream: #fbf7ef;
+  --white: #ffffff;
+  --text-dark: #26342d;
+  --text-gray: #6f7b74;
+  --border-color: #e7dfd3;
+}
+
+/* ================================
+   GENERAL STYLES
+   ================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background-color: var(--cream);
+  color: var(--text-dark);
+  font-family: Arial, sans-serif;
+}
+
+/* ================================
+   NAVIGATION BAR
+   ================================ */
+
+.cookly-navbar {
+  padding: 16px 0;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Cookly logo */
+
+.cookly-logo {
+  color: var(--primary-green);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.cookly-logo:hover {
+  color: var(--dark-green);
+}
+
+/* Navigation list */
+
+.navbar-nav {
+  gap: 8px;
+}
+
+/* Navigation links */
+
+.nav-link {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--primary-green);
+}
+
+/* Register button */
+
+.register-button {
+  display: inline-block;
+  padding: 9px 20px;
+  color: var(--white);
+  background-color: var(--primary-green);
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.register-button:hover {
+  color: var(--white);
+  background-color: var(--dark-green);
+}
+
+/* ================================
+   TEMPORARY PAGE CONTENT
+   ================================ */
+
+.page-content {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.page-content h1 {
+  margin-bottom: 10px;
+  color: var(--primary-green);
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.page-content p {
+  color: var(--text-gray);
+  font-size: 1.1rem;
+}
+
+/* ================================
+   MOBILE DESIGN
+   ================================ */
+
+@media (max-width: 991px) {
+  .navbar-nav {
+    align-items: flex-start;
+    gap: 4px;
+    padding-top: 20px;
+    padding-bottom: 10px;
+  }
+
+  .register-button {
+    margin-top: 8px;
+  }
+
+  .page-content {
+    padding-top: 50px;
+  }
+
+  .page-content h1 {
+    font-size: 2.4rem;
+  }
+}
