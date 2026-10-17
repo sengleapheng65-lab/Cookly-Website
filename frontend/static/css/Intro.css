@@ -1,0 +1,352 @@
+/* ================================
+   HERO SECTION
+   ================================ */
+
+.hero-section {
+  padding: 32px 0 30px;
+  overflow: hidden;
+  background-color: var(--cream);
+}
+
+.hero-grid {
+  min-height: 700px;
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  align-items: center;
+  gap: 60px;
+}
+
+/* ================================
+   HERO CONTENT
+   ================================ */
+
+.hero-content {
+  width: 100%;
+  max-width: 780px;
+}
+
+.hero-content h1 {
+  max-width: 720px;
+  margin-bottom: 22px;
+  color: var(--dark-green);
+  font-size: clamp(3.5rem, 4.8vw, 5.2rem);
+  font-weight: 800;
+  line-height: 1.03;
+  letter-spacing: -0.18rem;
+}
+
+.hero-description {
+  max-width: 720px;
+  margin-bottom: 30px;
+  color: var(--text-gray);
+  font-size: 1.15rem;
+  line-height: 1.65;
+}
+
+/* ================================
+   SEARCH FORM
+   ================================ */
+
+.recipe-search {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.search-icon {
+  margin-left: 12px;
+  color: var(--text-gray);
+  font-size: 1.25rem;
+}
+
+.recipe-search input {
+  min-width: 0;
+  flex: 1;
+  padding: 13px 5px;
+  color: var(--text-dark);
+  background-color: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+}
+
+.recipe-search input::placeholder {
+  color: #929b96;
+}
+
+.recipe-search button {
+  padding: 14px 23px;
+  color: var(--white);
+  background-color: var(--primary-green);
+  border: none;
+  border-radius: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.recipe-search button:hover {
+  background-color: var(--dark-green);
+  transform: translateY(-1px);
+}
+
+/* ================================
+   POPULAR SEARCHES
+   ================================ */
+
+.popular-searches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  color: var(--text-gray);
+  font-size: 0.92rem;
+}
+
+.popular-searches a {
+  padding: 7px 14px;
+  color: var(--primary-green);
+  background-color: rgba(31, 92, 66, 0.08);
+  border-radius: 20px;
+  font-weight: 700;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.popular-searches a:hover {
+  color: var(--white);
+  background-color: var(--primary-green);
+}
+
+/* ================================
+   SHARE RECIPE LINK
+   ================================ */
+
+.share-recipe-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 25px;
+  padding-bottom: 4px;
+  color: var(--primary-green);
+  border-bottom: 2px solid var(--primary-green);
+  font-weight: 700;
+}
+
+.share-recipe-link i {
+  transition: transform 0.25s ease;
+}
+
+.share-recipe-link:hover i {
+  transform: translateX(5px);
+}
+
+/* ================================
+   HERO FOOD VISUAL
+   ================================ */
+
+.hero-visual {
+  position: relative;
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-orange);
+  border-radius: 48% 52% 43% 57% / 52% 43% 57% 48%;
+}
+
+/* Decorative circles */
+
+.hero-visual::before,
+.hero-visual::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+}
+
+.hero-visual::before {
+  top: 35px;
+  right: 35px;
+  width: 65px;
+  height: 65px;
+  background-color: rgba(233, 123, 57, 0.15);
+}
+
+.hero-visual::after {
+  bottom: 55px;
+  left: 30px;
+  width: 38px;
+  height: 38px;
+  background-color: rgba(31, 92, 66, 0.15);
+}
+
+/* Food plate */
+
+/* Pasta image */
+
+.food-plate {
+  position: relative;
+  z-index: 1;
+  width: min(88%, 460px);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-5deg);
+}
+
+.food-plate img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 30px rgba(38, 52, 45, 0.2));
+}
+
+/* ================================
+   QUICK MEAL CARD
+   ================================ */
+
+.quick-meal-card {
+  position: absolute;
+  right: -25px;
+  bottom: 35px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 17px 20px;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.quick-meal-card i {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-orange);
+  background-color: var(--light-orange);
+  border-radius: 50%;
+  font-size: 1.4rem;
+}
+
+.quick-meal-card strong,
+.quick-meal-card span {
+  display: block;
+}
+
+.quick-meal-card strong {
+  color: var(--dark-green);
+  font-size: 1rem;
+}
+
+.quick-meal-card span {
+  margin-top: 4px;
+  color: var(--text-gray);
+  font-size: 0.8rem;
+}
+
+/* ================================
+   TABLET DESIGN
+   ================================ */
+
+@media (max-width: 925px) {
+  .hero-section {
+    min-height: auto;
+    padding: 60px 0;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 55px;
+  }
+
+  .hero-content {
+    max-width: 720px;
+  }
+
+  .hero-visual {
+    width: min(600px, 100%);
+    min-height: 430px;
+    margin: 0 auto;
+  }
+}
+
+/* ================================
+   MOBILE DESIGN
+   ================================ */
+
+@media (max-width: 576px) {
+  .hero-section {
+    padding: 45px 0 65px;
+  }
+
+  .hero-grid {
+    gap: 45px;
+  }
+
+  .hero-label {
+    font-size: 0.72rem;
+  }
+
+  .hero-content h1 {
+    font-size: 2.8rem;
+    letter-spacing: -0.1rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .recipe-search {
+    flex-wrap: wrap;
+  }
+
+  .recipe-search input {
+    width: calc(100% - 50px);
+  }
+
+  .recipe-search button {
+    width: 100%;
+  }
+
+  .hero-visual {
+    min-height: 340px;
+  }
+
+  .food-plate {
+    width: min(85%, 280px);
+  }
+
+  .quick-meal-card {
+    right: 8px;
+    bottom: 5px;
+    padding: 13px 15px;
+  }
+
+  .quick-meal-card i {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+
+  .quick-meal-card strong {
+    font-size: 0.9rem;
+  }
+}

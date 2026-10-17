@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Cookly is a recipe-sharing platform for home cooks."
+    />
+
+    <title>Cookly | Recipe Sharing</title>
+
+    <!-- Bootstrap Icons only -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+
+    <!-- Cookly CSS Link -->
+    <link rel="stylesheet" href="../static/css/Navbar.css" />
+    <link rel="stylesheet" href="../static/css/Intro.css" />
+
+    <!-- Cookly JavaScript -->
+    <script src="../static/js/main.js" defer></script>
+  </head>
+
+  <body>
+    <!-- ================================
+     NAVIGATION
+     ================================ -->
+
+    <header class="navbar">
+      <nav class="navbar_container">
+        <!-- Cookly logo -->
+        <a class="cookly_brand" href="#">
+          <span id="nav_logo">
+            <i class="bi bi-egg-fried" aria-hidden="true"></i>
+          </span>
+
+          <span>Cookly</span>
+        </a>
+
+        <!-- Navigation links -->
+        <ul class="navbar_menu" id="navbarMenu">
+          <li class="item">
+            <a class="nav_link active" href="#">Home</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="#">Browse Recipes</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="#">Add Recipe</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="#">My Collections</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="#">Login</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_button" href="#">
+              Register
+              <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Hamburger button -->
+        <button
+          class="navbar_toggle"
+          id="navbarToggle"
+          type="button"
+          aria-label="Open navigation menu"
+          aria-controls="navbarMenu"
+          aria-expanded="false"
+        >
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ================================
+         HERO SECTION
+         ================================ -->
+
+    <main>
+      <section class="hero-section">
+        <div class="page-container hero-grid">
+          <!-- Hero text -->
+          <div class="hero-content">
+            <p class="hero-label">Cook. Share. Enjoy.</p>
+
+            <h1>Find your next favorite recipe.</h1>
+
+            <p class="hero-description">
+              Discover simple and delicious recipes shared by home cooks around
+              the world.
+            </p>
+
+            <!-- Search form -->
+            <form class="recipe-search" id="recipeSearch">
+              <i class="bi bi-search search-icon" aria-hidden="true"></i>
+
+              <input
+                type="search"
+                id="searchInput"
+                placeholder="Search recipes, cuisine, or ingredients..."
+                aria-label="Search recipes"
+              />
+
+              <button type="submit">Search Recipes</button>
+            </form>
+
+            <!-- Popular searches -->
+            <div class="popular-searches">
+              <span>Popular:</span>
+              <a href="#">Pasta</a>
+              <a href="#">Chicken</a>
+              <a href="#">Vegan</a>
+            </div>
+
+            <a class="share-recipe-link" href="#">
+              Share a recipe
+              <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          <!-- Hero food illustration -->
+          <div class="hero-visual">
+            <div class="food-plate">
+              <img
+                src="../static/images/pasta.png"
+                alt="Pasta with tomatoes and basil"
+              />
+            </div>
+
+            <div class="quick-meal-card">
+              <i class="bi bi-clock" aria-hidden="true"></i>
+
+              <div>
+                <strong>20-minute meals</strong>
+                <span>Fast, simple, and delicious</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
