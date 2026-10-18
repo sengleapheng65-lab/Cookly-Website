@@ -1,0 +1,260 @@
+/* ================================
+   POPULAR RECIPES SECTION
+   ================================ */
+
+.popular-recipes-section {
+  padding: 90px 0;
+  background-color: var(--white);
+}
+
+/* ================================
+   SECTION HEADING
+   ================================ */
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.section-label {
+  margin-bottom: 10px;
+  color: var(--accent-orange);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.16rem;
+  text-transform: uppercase;
+}
+
+.section-heading h2 {
+  color: var(--dark-green);
+  font-family: "Fraunces", serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.06rem;
+}
+
+/* View all recipes link */
+
+.view-all-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 5px;
+  color: var(--primary-green);
+  border-bottom: 2px solid var(--primary-green);
+  font-weight: 700;
+}
+
+.view-all-link i {
+  transition: transform 0.25s ease;
+}
+
+.view-all-link:hover i {
+  transform: translateX(5px);
+}
+
+/* ================================
+   RECIPE CARD GRID
+   ================================ */
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* ================================
+   RECIPE CARD
+   ================================ */
+
+.recipe-card {
+  overflow: hidden;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 22px;
+  box-shadow: 0 12px 30px rgba(38, 52, 45, 0.08);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.recipe-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 45px rgba(38, 52, 45, 0.15);
+}
+
+/* ================================
+   RECIPE IMAGES
+   ================================ */
+
+.recipe-image {
+  position: relative;
+  height: 270px;
+  overflow: hidden;
+  background-position: center;
+  background-size: cover;
+}
+
+/* These images will be added in the next step */
+
+.recipe-image-pasta {
+  background-color: #f1c6a5;
+  background-image:
+    linear-gradient(rgba(23, 69, 50, 0.05), rgba(23, 69, 50, 0.05)),
+    url("../images/creamy-tomato-pasta.jpg");
+}
+
+.recipe-image-bowl {
+  background-color: #d9e2bb;
+  background-image:
+    linear-gradient(rgba(23, 69, 50, 0.05), rgba(23, 69, 50, 0.05)),
+    url("../images/avocado-bowl.jpg");
+}
+
+.recipe-image-chicken {
+  background-color: #dfbd96;
+  background-image:
+    linear-gradient(rgba(23, 69, 50, 0.05), rgba(23, 69, 50, 0.05)),
+    url("../images/roasted-chicken.jpg");
+}
+
+/* Recipe category label */
+
+.recipe-category {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  padding: 8px 14px;
+  color: var(--dark-green);
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Save recipe button */
+
+.save-recipe {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-green);
+  background-color: rgba(255, 255, 255, 0.92);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.save-recipe:hover {
+  color: var(--white);
+  background-color: var(--accent-orange);
+  transform: scale(1.08);
+}
+
+/* ================================
+   RECIPE INFORMATION
+   ================================ */
+
+.recipe-card-content {
+  padding: 24px;
+}
+
+.recipe-card-content h3 {
+  margin-bottom: 16px;
+  color: var(--dark-green);
+  font-family: "Fraunces", serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+/* Cooking time and rating */
+
+.recipe-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  color: var(--text-gray);
+  font-size: 0.9rem;
+}
+
+.recipe-details span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.recipe-details .bi-clock {
+  color: var(--primary-green);
+}
+
+.recipe-details .bi-star-fill {
+  color: #f5b914;
+}
+
+/* ================================
+   TABLET DESIGN
+   ================================ */
+
+@media (max-width: 925px) {
+  .popular-recipes-section {
+    padding: 70px 0;
+  }
+
+  .recipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .recipe-card:last-child {
+    grid-column: 1 / -1;
+    width: calc(50% - 14px);
+  }
+}
+
+/* ================================
+   MOBILE DESIGN
+   ================================ */
+
+@media (max-width: 576px) {
+  .popular-recipes-section {
+    padding: 60px 0;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 30px;
+  }
+
+  .section-heading h2 {
+    font-size: 2.3rem;
+  }
+
+  .recipe-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-card:last-child {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .recipe-image {
+    height: 240px;
+  }
+}
