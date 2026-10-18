@@ -37,7 +37,7 @@ body {
   overflow-x: hidden;
   background-color: var(--cream);
   color: var(--text-dark);
-  font-family: Arial, sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 body.menu-open {
@@ -62,7 +62,7 @@ a {
 /* Reusable content container */
 
 .page-container {
-  width: 86%;
+  width: 89%;
   max-width: 1600px;
   margin: 0 auto;
 }
@@ -83,8 +83,8 @@ a {
 
 .navbar_container {
   width: 100%;
-  height: 95px;
-  padding: 0 7%;
+  height: 105px;
+  padding: 0 5.5%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -99,21 +99,28 @@ a {
 .cookly_brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-shrink: 0;
+
   color: var(--primary-green);
-  font-size: 1.5rem;
+  font-family: "Fraunces", serif;
+  font-size: 2.15rem;
   font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.07rem;
   text-decoration: none;
 }
 
+/* Green cooking-pan circle */
+
 #nav_logo {
-  width: 60px;
-  height: 60px;
+  position: relative;
+  width: 62px;
+  height: 62px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  color: var(--white);
   background-color: var(--primary-green);
   border-radius: 50%;
   transition:
@@ -121,13 +128,56 @@ a {
     transform 0.3s ease;
 }
 
-#nav_logo i {
-  font-size: 1.7rem;
+/* Pan handle */
+
+#nav_logo::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: 5px;
+  width: 8px;
+  height: 27px;
+  background-color: var(--primary-green);
+  border-radius: 10px;
+  transform: rotate(38deg);
+  transform-origin: bottom center;
 }
+
+/* Irregular white fried egg */
+
+.logo_egg {
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
+  transform: rotate(-10deg);
+}
+
+/* Yellow yolk */
+
+.logo_egg::after {
+  content: "";
+  width: 13px;
+  height: 13px;
+  background-color: #f5b914;
+  border-radius: 50%;
+  transform: rotate(10deg);
+}
+
+/* Logo hover */
 
 .cookly_brand:hover #nav_logo {
   background-color: var(--dark-green);
-  transform: scale(1.08) rotate(5deg);
+  transform: scale(1.05) rotate(-4deg);
+}
+
+.cookly_brand:hover #nav_logo::before {
+  background-color: var(--dark-green);
 }
 
 /* ================================
@@ -196,9 +246,9 @@ a {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 12px 20px;
+  padding: 13px 22px;
   color: var(--white);
-  background-color: var(--accent-orange);
+  background-color: var(--primary-green);
   border-radius: 25px;
   font-size: 15px;
   font-weight: 700;
@@ -212,9 +262,9 @@ a {
 
 .nav_button:hover {
   color: var(--white);
-  background-color: var(--dark-orange);
+  background-color: var(--dark-green);
   transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(233, 123, 57, 0.3);
+  box-shadow: 0 8px 18px rgba(31, 92, 66, 0.25);
 }
 
 .nav_button i {
@@ -276,12 +326,26 @@ a {
     height: 52px;
   }
 
-  #nav_logo i {
-    font-size: 1.5rem;
+  #nav_logo::before {
+    top: -8px;
+    right: 4px;
+    width: 7px;
+    height: 23px;
+  }
+
+  .logo_egg {
+    width: 27px;
+    height: 25px;
+  }
+
+  .logo_egg::after {
+    width: 11px;
+    height: 11px;
   }
 
   .cookly_brand {
-    font-size: 1.35rem;
+    gap: 12px;
+    font-size: 1.8rem;
   }
 
   .navbar_toggle {
@@ -339,7 +403,7 @@ a {
     text-align: center;
   }
 
-  /* Turn the hamburger into an X */
+  /* Turn hamburger into an X */
 
   .navbar_toggle.active .bar:nth-child(1) {
     transform: rotate(45deg) translate(6px, 6px);
@@ -375,16 +439,29 @@ a {
     height: 46px;
   }
 
-  #nav_logo i {
-    font-size: 1.35rem;
+  #nav_logo::before {
+    top: -7px;
+    right: 4px;
+    width: 6px;
+    height: 20px;
+  }
+
+  .logo_egg {
+    width: 24px;
+    height: 22px;
+  }
+
+  .logo_egg::after {
+    width: 10px;
+    height: 10px;
   }
 
   .cookly_brand {
-    gap: 9px;
-    font-size: 1.25rem;
+    gap: 10px;
+    font-size: 1.55rem;
   }
 
   .page-container {
-    width: min(100% - 24px, 1180px);
+    width: calc(100% - 24px);
   }
 }
