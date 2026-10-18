@@ -37,11 +37,13 @@
 .hero-content h1 {
   max-width: 720px;
   margin-bottom: 24px;
+
   color: var(--dark-green);
+  font-family: "Fraunces", serif;
   font-size: clamp(3.6rem, 4.8vw, 5.25rem);
-  font-weight: 800;
-  line-height: 1.02;
-  letter-spacing: -0.18rem;
+  font-weight: 700;
+  line-height: 1.04;
+  letter-spacing: -0.12rem;
 }
 
 .hero-description {
