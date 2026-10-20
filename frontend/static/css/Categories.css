@@ -1,0 +1,200 @@
+/* ================================
+   RECIPE CATEGORIES SECTION
+   ================================ */
+
+.categories-section {
+  padding: 90px 0;
+  background-color: var(--cream);
+}
+
+.categories-heading {
+  margin-bottom: 40px;
+}
+
+/* ================================
+   CATEGORY GRID
+   ================================ */
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+}
+
+/* ================================
+   CATEGORY CARD
+   ================================ */
+
+.category-card {
+  min-height: 205px;
+  padding: 25px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 22px;
+  box-shadow: 0 10px 25px rgba(38, 52, 45, 0.07);
+
+  text-align: center;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.category-card:hover {
+  border-color: rgba(31, 92, 66, 0.3);
+  box-shadow: 0 18px 35px rgba(38, 52, 45, 0.13);
+  transform: translateY(-7px);
+}
+
+/* ================================
+   CATEGORY ICON
+   ================================ */
+
+.category-icon {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 19px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-size: 2rem;
+
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.category-card:hover .category-icon {
+  color: var(--white);
+  background-color: var(--primary-green);
+  transform: rotate(-5deg) scale(1.08);
+}
+
+/* Icon colors */
+
+.category-icon-orange {
+  color: #d96a2b;
+  background-color: #fff0e6;
+}
+
+.category-icon-green {
+  color: #1f5c42;
+  background-color: #e4f0e9;
+}
+
+.category-icon-red {
+  color: #c95345;
+  background-color: #fde9e5;
+}
+
+.category-icon-yellow {
+  color: #c58a12;
+  background-color: #fff4cf;
+}
+
+.category-icon-light-green {
+  color: #4d854c;
+  background-color: #e9f3df;
+}
+
+.category-icon-purple {
+  color: #765b9e;
+  background-color: #eee8f5;
+}
+
+/* ================================
+   CATEGORY TEXT
+   ================================ */
+
+.category-name {
+  margin-bottom: 7px;
+
+  color: var(--dark-green);
+
+  font-family: "Fraunces", serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.category-count {
+  color: var(--text-gray);
+  font-size: 0.82rem;
+}
+
+/* ================================
+   KEYBOARD FOCUS
+   ================================ */
+
+.category-card:focus-visible {
+  outline: 3px solid rgba(233, 123, 57, 0.45);
+  outline-offset: 4px;
+}
+
+/* ================================
+   SMALL DESKTOP
+   ================================ */
+
+@media (max-width: 1200px) {
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ================================
+   TABLET
+   ================================ */
+
+@media (max-width: 768px) {
+  .categories-section {
+    padding: 70px 0;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ================================
+   SMALL MOBILE
+   ================================ */
+
+@media (max-width: 480px) {
+  .categories-section {
+    padding: 60px 0;
+  }
+
+  .category-grid {
+    gap: 14px;
+  }
+
+  .category-card {
+    min-height: 175px;
+    padding: 20px 12px;
+  }
+
+  .category-icon {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 15px;
+    font-size: 1.65rem;
+  }
+
+  .category-name {
+    font-size: 1.05rem;
+  }
+
+  .category-count {
+    font-size: 0.76rem;
+  }
+}

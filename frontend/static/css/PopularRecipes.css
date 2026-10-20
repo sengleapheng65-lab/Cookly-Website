@@ -166,6 +166,21 @@
   transform: scale(1.08);
 }
 
+/* Saved recipe state */
+
+.save-recipe.saved {
+  color: var(--white);
+  background-color: var(--accent-orange);
+}
+
+.save-recipe.saved:hover {
+  background-color: var(--dark-orange);
+}
+
+.recipe-card.recipe-saved {
+  border-color: rgba(233, 123, 57, 0.45);
+}
+
 /* ================================
    RECIPE INFORMATION
    ================================ */

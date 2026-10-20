@@ -1,0 +1,162 @@
+/* ================================
+   SHARE RECIPE CTA SECTION
+   ================================ */
+
+.share-cta-section {
+  padding: 90px 0;
+  background-color: var(--white);
+}
+
+/* Main CTA card */
+
+.share-cta-card {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  padding: 60px 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+
+  background-color: var(--primary-green);
+  border-radius: 30px;
+}
+
+/* Decorative background circle */
+
+.share-cta-card::before {
+  content: "";
+  position: absolute;
+  right: 210px;
+  bottom: -150px;
+  width: 360px;
+  height: 360px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+}
+
+/* CTA text */
+
+.share-cta-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+}
+
+.share-cta-content .section-label {
+  color: var(--light-orange);
+}
+
+.share-cta-content h2 {
+  margin-bottom: 16px;
+  color: var(--white);
+  font-family: "Fraunces", serif;
+  font-size: clamp(2.3rem, 4vw, 3.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.06rem;
+}
+
+.share-cta-content > p:not(.section-label) {
+  max-width: 500px;
+  margin-bottom: 28px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* CTA button */
+
+.share-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 22px;
+
+  color: var(--dark-green);
+  background-color: var(--white);
+  border-radius: 12px;
+
+  font-weight: 700;
+
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.share-cta-button:hover {
+  color: var(--white);
+  background-color: var(--accent-orange);
+  transform: translateY(-3px);
+}
+
+/* Decorative icon */
+
+.share-cta-icon {
+  position: relative;
+  z-index: 1;
+  width: 170px;
+  height: 170px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--primary-green);
+  background-color: var(--light-orange);
+  border-radius: 50%;
+  font-size: 5rem;
+  transform: rotate(8deg);
+}
+
+/* ================================
+   TABLET DESIGN
+   ================================ */
+
+@media (max-width: 768px) {
+  .share-cta-section {
+    padding: 70px 0;
+  }
+
+  .share-cta-card {
+    padding: 50px 40px;
+  }
+
+  .share-cta-icon {
+    width: 130px;
+    height: 130px;
+    font-size: 3.8rem;
+  }
+}
+
+/* ================================
+   MOBILE DESIGN
+   ================================ */
+
+@media (max-width: 576px) {
+  .share-cta-section {
+    padding: 60px 0;
+  }
+
+  .share-cta-card {
+    min-height: 0;
+    padding: 42px 25px;
+    align-items: flex-start;
+    flex-direction: column;
+    border-radius: 24px;
+  }
+
+  .share-cta-content h2 {
+    font-size: 2.4rem;
+  }
+
+  .share-cta-icon {
+    position: absolute;
+    right: -25px;
+    bottom: -25px;
+    width: 125px;
+    height: 125px;
+    font-size: 3.5rem;
+  }
+}
