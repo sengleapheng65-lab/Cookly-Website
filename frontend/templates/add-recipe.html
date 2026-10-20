@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="../static/css/Navbar.css" />
     <link rel="stylesheet" href="../static/css/Intro.css" />
     <link rel="stylesheet" href="../static/css/PopularRecipes.css" />
+    <link rel="stylesheet" href="../static/css/AddRecipe.css" />
     <link rel="stylesheet" href="../static/css/BrowseRecipes.css" />
     <link rel="stylesheet" href="../static/css/Categories.css" />
     <link rel="stylesheet" href="../static/css/ShareCTA.css" />
@@ -61,11 +62,11 @@
           </li>
 
           <li class="item">
-            <a class="nav_link active" href="browse.html">Browse Recipes</a>
+            <a class="nav_link" href="browse.html">Browse Recipes</a>
           </li>
 
           <li class="item">
-            <a class="nav_link" href="home.html#share-recipe">Add Recipe</a>
+            <a class="nav_link active" href="add-recipe.html">Add Recipe</a>
           </li>
 
           <li class="item">
@@ -102,179 +103,180 @@
 
     <main>
       <!-- ================================
-       BROWSE RECIPES PAGE
+       ADD RECIPE PAGE
        ================================ -->
 
-      <section class="browse-hero-section">
+      <section class="add-recipe-section">
         <div class="page-container">
-          <!-- Page introduction -->
-          <div class="browse-page-heading">
-            <p class="section-label">Explore Cookly</p>
-            <h1>Browse delicious recipes</h1>
+          <!-- Page heading -->
+          <div class="add-recipe-heading">
+            <p class="section-label">Share with Cookly</p>
+            <h1>Add your recipe</h1>
             <p>
-              Find simple meals, comforting favorites, and new ideas for every
-              day.
+              Share a recipe you love and help other home cooks find their next
+              favorite meal.
             </p>
           </div>
 
-          <!-- Recipe search -->
-          <form class="browse-search-form">
-            <i class="bi bi-search" aria-hidden="true"></i>
+          <!-- Recipe form -->
+          <form class="add-recipe-form" id="addRecipeForm">
+            <!-- Basic recipe information -->
+            <div class="form-section">
+              <h2>Recipe details</h2>
 
-            <input
-              type="search"
-              placeholder="Search recipes, cuisines, or ingredients..."
-              aria-label="Search recipes"
-            />
+              <div class="form-grid">
+                <div class="form-group form-group-full">
+                  <label for="recipeTitle">Recipe title</label>
 
-            <button type="submit">Search</button>
+                  <input
+                    type="text"
+                    id="recipeTitle"
+                    name="recipeTitle"
+                    placeholder="Example: Creamy Tomato Pasta"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="recipeCategory">Category</label>
+
+                  <select id="recipeCategory" name="recipeCategory" required>
+                    <option value="">Choose a category</option>
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="dessert">Dessert</option>
+                    <option value="healthy">Healthy</option>
+                    <option value="vegan">Vegan</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="recipeDifficulty">Difficulty</label>
+
+                  <select
+                    id="recipeDifficulty"
+                    name="recipeDifficulty"
+                    required
+                  >
+                    <option value="">Choose difficulty</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="prepTime">Preparation time</label>
+
+                  <input
+                    type="number"
+                    id="prepTime"
+                    name="prepTime"
+                    min="0"
+                    placeholder="Minutes"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="cookTime">Cooking time</label>
+
+                  <input
+                    type="number"
+                    id="cookTime"
+                    name="cookTime"
+                    min="0"
+                    placeholder="Minutes"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="servings">Servings</label>
+
+                  <input
+                    type="number"
+                    id="servings"
+                    name="servings"
+                    min="1"
+                    placeholder="Example: 4"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="recipeImage">Recipe photo</label>
+
+                  <input
+                    type="file"
+                    id="recipeImage"
+                    name="recipeImage"
+                    accept="image/*"
+                  />
+                </div>
+
+                <div class="form-group form-group-full">
+                  <label for="recipeDescription">Short description</label>
+
+                  <textarea
+                    id="recipeDescription"
+                    name="recipeDescription"
+                    rows="4"
+                    placeholder="Tell the Cookly community about this recipe..."
+                    required
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ingredients -->
+            <div class="form-section">
+              <h2>Ingredients</h2>
+
+              <div class="form-group">
+                <label for="ingredients"> List one ingredient per line </label>
+
+                <textarea
+                  id="ingredients"
+                  name="ingredients"
+                  rows="8"
+                  placeholder="250g pasta&#10;2 tomatoes&#10;1 tablespoon olive oil&#10;Fresh basil"
+                  required
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="form-section">
+              <h2>Instructions</h2>
+
+              <div class="form-group">
+                <label for="instructions">
+                  Write each cooking step on a new line
+                </label>
+
+                <textarea
+                  id="instructions"
+                  name="instructions"
+                  rows="10"
+                  placeholder="1. Boil the pasta.&#10;2. Prepare the tomato sauce.&#10;3. Combine the pasta and sauce.&#10;4. Serve with fresh basil."
+                  required
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Form submission -->
+            <div class="form-actions">
+              <button class="submit-recipe-button" type="submit">
+                Publish recipe
+                <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+              </button>
+
+              <p>Your recipe can be edited later.</p>
+            </div>
           </form>
         </div>
-      </section>
-
-      <!-- ================================
-       RECIPE FILTERS AND RESULTS
-       ================================ -->
-
-      <section class="browse-results-section">
-        <div class="page-container">
-          <!-- Filter buttons -->
-          <div class="recipe-filter-bar">
-            <button
-              class="recipe-filter active"
-              type="button"
-              data-filter="all"
-            >
-              All Recipes
-            </button>
-
-            <button class="recipe-filter" type="button" data-filter="pasta">
-              Pasta
-            </button>
-
-            <button class="recipe-filter" type="button" data-filter="healthy">
-              Healthy
-            </button>
-
-            <button class="recipe-filter" type="button" data-filter="dinner">
-              Dinner
-            </button>
-
-            <button
-              class="recipe-filter"
-              type="button"
-              data-filter="quick-meals"
-            >
-              Quick Meals
-            </button>
-          </div>
-
-          <!-- Results heading -->
-          <div class="browse-results-heading">
-            <h2>Featured recipes</h2>
-            <p>Handpicked favorites from the Cookly community.</p>
-          </div>
-
-          <!-- Recipe card grid -->
-          <div class="recipe-grid">
-            <!-- Recipe card 1 -->
-            <article class="recipe-card" data-category="pasta">
-              <div class="recipe-image recipe-image-pasta">
-                <span class="recipe-category">Pasta</span>
-
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <div class="recipe-card-content">
-                <h3>Creamy Tomato Pasta</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    25 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.9
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Recipe card 2 -->
-            <article class="recipe-card" data-category="healthy">
-              <div class="recipe-image recipe-image-bowl">
-                <span class="recipe-category">Healthy</span>
-
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <div class="recipe-card-content">
-                <h3>Fresh Avocado Bowl</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    15 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.8
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Recipe card 3 -->
-            <article class="recipe-card" data-category="dinner">
-              <div class="recipe-image recipe-image-chicken">
-                <span class="recipe-category">Dinner</span>
-
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <div class="recipe-card-content">
-                <h3>Herb Roasted Chicken</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    45 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.9
-                  </span>
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-
-        <p class="browse-empty-message" id="browseEmptyMessage" hidden>
-          No recipes match your search yet.
-        </p>
       </section>
     </main>
 

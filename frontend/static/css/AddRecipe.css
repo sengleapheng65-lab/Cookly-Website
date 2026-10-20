@@ -1,0 +1,236 @@
+/* ================================
+   ADD RECIPE PAGE
+   ================================ */
+
+.add-recipe-section {
+  padding: 80px 0 100px;
+  background-color: var(--cream);
+}
+
+/* Page heading */
+
+.add-recipe-heading {
+  max-width: 720px;
+  margin: 0 auto 45px;
+  text-align: center;
+}
+
+.add-recipe-heading h1 {
+  margin-bottom: 16px;
+  color: var(--dark-green);
+  font-family: "Fraunces", serif;
+  font-size: clamp(3rem, 5vw, 4.7rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.1rem;
+}
+
+.add-recipe-heading > p:not(.section-label) {
+  max-width: 570px;
+  margin: 0 auto;
+  color: var(--text-gray);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+/* ================================
+   RECIPE FORM
+   ================================ */
+
+.add-recipe-form {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.form-section {
+  margin-bottom: 24px;
+  padding: 38px;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 22px;
+  box-shadow: 0 12px 28px rgba(38, 52, 45, 0.06);
+}
+
+.form-section h2 {
+  margin-bottom: 28px;
+  color: var(--dark-green);
+  font-family: "Fraunces", serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* Form field layout */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
+/* Labels */
+
+.form-group label {
+  color: var(--dark-green);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+/* Inputs, selects, and text areas */
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 15px;
+  color: var(--text-dark);
+  background-color: #fdfcf9;
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.97rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.form-group textarea {
+  min-height: 130px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.form-group input[type="file"] {
+  padding: 11px;
+  background-color: var(--light-orange);
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 4px rgba(31, 92, 66, 0.1);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #929b96;
+}
+
+/* ================================
+   FORM ACTIONS
+   ================================ */
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  padding: 8px 2px;
+}
+
+.submit-recipe-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 15px 23px;
+  color: var(--white);
+  background-color: var(--primary-green);
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.submit-recipe-button:hover {
+  background-color: var(--dark-green);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(31, 92, 66, 0.2);
+}
+
+.submit-recipe-button i {
+  transition: transform 0.25s ease;
+}
+
+.submit-recipe-button:hover i {
+  transform: translate(2px, -2px);
+}
+
+.form-actions p {
+  color: var(--text-gray);
+  font-size: 0.88rem;
+}
+
+/* Form success message */
+
+.form-message {
+  margin-top: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.form-message.success {
+  color: var(--primary-green);
+}
+
+/* ================================
+   MOBILE DESIGN
+   ================================ */
+
+@media (max-width: 576px) {
+  .add-recipe-section {
+    padding: 55px 0 70px;
+  }
+
+  .add-recipe-heading {
+    margin-bottom: 32px;
+  }
+
+  .add-recipe-heading h1 {
+    font-size: 2.8rem;
+  }
+
+  .form-section {
+    padding: 25px 18px;
+    border-radius: 18px;
+  }
+
+  .form-section h2 {
+    margin-bottom: 22px;
+    font-size: 1.55rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .form-group-full {
+    grid-column: auto;
+  }
+
+  .form-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .submit-recipe-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
