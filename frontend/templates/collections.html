@@ -10,7 +10,7 @@
       content="Cookly is a recipe-sharing platform for home cooks."
     />
 
-    <title>Browse Recipes | Cookly</title>
+    <title>My Collections | Cookly</title>
 
     <!-- Bootstrap Icons only -->
     <link
@@ -30,12 +30,14 @@
     <link rel="stylesheet" href="../static/css/Intro.css" />
     <link rel="stylesheet" href="../static/css/PopularRecipes.css" />
     <link rel="stylesheet" href="../static/css/BrowseRecipes.css" />
+    <link rel="stylesheet" href="../static/css/Collections.css" />
     <link rel="stylesheet" href="../static/css/Categories.css" />
     <link rel="stylesheet" href="../static/css/ShareCTA.css" />
     <link rel="stylesheet" href="../static/css/Footer.css" />
 
     <!-- Cookly JavaScript -->
-    <script src="../static/js/main.js" defer></script>
+    <script src="../static/js/navbar.js" defer></script>
+    <script src="../static/js/collections.js" defer></script>
   </head>
 
   <body>
@@ -61,7 +63,7 @@
           </li>
 
           <li class="item">
-            <a class="nav_link active" href="browse.html">Browse Recipes</a>
+            <a class="nav_link" href="browse.html">Browse Recipes</a>
           </li>
 
           <li class="item">
@@ -69,7 +71,9 @@
           </li>
 
           <li class="item">
-            <a class="nav_link" href="#">My Collections</a>
+            <a class="nav_link active" href="collections.html"
+              >My Collections</a
+            >
           </li>
 
           <li class="item">
@@ -102,179 +106,76 @@
 
     <main>
       <!-- ================================
-       BROWSE RECIPES PAGE
+       MY COLLECTIONS PAGE
        ================================ -->
 
-      <section class="browse-hero-section">
+      <section class="collections-section">
         <div class="page-container">
-          <!-- Page introduction -->
-          <div class="browse-page-heading">
-            <p class="section-label">Explore Cookly</p>
-            <h1>Browse delicious recipes</h1>
-            <p>
-              Find simple meals, comforting favorites, and new ideas for every
-              day.
+          <!-- Page heading -->
+          <div class="collections-heading">
+            <div>
+              <p class="section-label">Your Cookly space</p>
+              <h1>My collections</h1>
+              <p>Keep your favorite recipes in one easy-to-find place.</p>
+            </div>
+
+            <a class="collections-browse-button" href="browse.html">
+              Browse recipes
+              <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          <!-- Collection tabs -->
+          <div
+            class="collection-tabs"
+            role="tablist"
+            aria-label="Recipe collections"
+          >
+            <button
+              class="collection-tab active"
+              type="button"
+              role="tab"
+              data-collection="saved"
+            >
+              Saved recipes
+            </button>
+
+            <button
+              class="collection-tab"
+              type="button"
+              role="tab"
+              data-collection="created"
+            >
+              Created by me
+            </button>
+          </div>
+
+          <!-- Empty saved-recipes state -->
+          <div class="collection-empty-state">
+            <div
+              class="collection-empty-icon"
+              id="collectionEmptyIcon"
+              aria-hidden="true"
+            >
+              <i class="bi bi-heart"></i>
+            </div>
+
+            <h2 id="collectionEmptyTitle">No saved recipes yet</h2>
+
+            <p id="collectionEmptyText">
+              When you find a recipe you love, save it and it will appear here.
             </p>
-          </div>
 
-          <!-- Recipe search -->
-          <form class="browse-search-form">
-            <i class="bi bi-search" aria-hidden="true"></i>
-
-            <input
-              type="search"
-              placeholder="Search recipes, cuisines, or ingredients..."
-              aria-label="Search recipes"
-            />
-
-            <button type="submit">Search</button>
-          </form>
-        </div>
-      </section>
-
-      <!-- ================================
-       RECIPE FILTERS AND RESULTS
-       ================================ -->
-
-      <section class="browse-results-section">
-        <div class="page-container">
-          <!-- Filter buttons -->
-          <div class="recipe-filter-bar">
-            <button
-              class="recipe-filter active"
-              type="button"
-              data-filter="all"
+            <a
+              class="collection-empty-button"
+              id="collectionEmptyLink"
+              href="browse.html"
             >
-              All Recipes
-            </button>
-
-            <button class="recipe-filter" type="button" data-filter="pasta">
-              Pasta
-            </button>
-
-            <button class="recipe-filter" type="button" data-filter="healthy">
-              Healthy
-            </button>
-
-            <button class="recipe-filter" type="button" data-filter="dinner">
-              Dinner
-            </button>
-
-            <button
-              class="recipe-filter"
-              type="button"
-              data-filter="quick-meals"
-            >
-              Quick Meals
-            </button>
-          </div>
-
-          <!-- Results heading -->
-          <div class="browse-results-heading">
-            <h2>Featured recipes</h2>
-            <p>Handpicked favorites from the Cookly community.</p>
-          </div>
-
-          <!-- Recipe card grid -->
-          <div class="recipe-grid">
-            <!-- Recipe card 1 -->
-            <article class="recipe-card" data-category="pasta">
-              <div class="recipe-image recipe-image-pasta">
-                <span class="recipe-category">Pasta</span>
-
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <div class="recipe-card-content">
-                <h3>Creamy Tomato Pasta</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    25 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.9
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Recipe card 2 -->
-            <article class="recipe-card" data-category="healthy">
-              <div class="recipe-image recipe-image-bowl">
-                <span class="recipe-category">Healthy</span>
-
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <div class="recipe-card-content">
-                <h3>Fresh Avocado Bowl</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    15 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.8
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Recipe card 3 -->
-            <article class="recipe-card" data-category="dinner">
-              <div class="recipe-image recipe-image-chicken">
-                <span class="recipe-category">Dinner</span>
-
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <div class="recipe-card-content">
-                <h3>Herb Roasted Chicken</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    45 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.9
-                  </span>
-                </div>
-              </div>
-            </article>
+              Explore recipes
+              <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
           </div>
         </div>
-
-        <p class="browse-empty-message" id="browseEmptyMessage" hidden>
-          No recipes match your search yet.
-        </p>
       </section>
     </main>
 

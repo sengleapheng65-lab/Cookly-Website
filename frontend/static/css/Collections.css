@@ -1,0 +1,204 @@
+/* ================================
+   MY COLLECTIONS PAGE
+   ================================ */
+
+.collections-section {
+  min-height: calc(100vh - 95px);
+  padding: 85px 0 110px;
+  background-color: var(--cream);
+}
+
+/* Page heading */
+
+.collections-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 42px;
+}
+
+.collections-heading h1 {
+  margin-bottom: 13px;
+  color: var(--dark-green);
+  font-family: "Fraunces", serif;
+  font-size: clamp(3rem, 5vw, 4.6rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.1rem;
+}
+
+.collections-heading > div > p:not(.section-label) {
+  max-width: 520px;
+  color: var(--text-gray);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Browse recipes button */
+
+.collections-browse-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 21px;
+  color: var(--white);
+  background-color: var(--primary-green);
+  border-radius: 12px;
+  font-weight: 700;
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.collections-browse-button:hover {
+  color: var(--white);
+  background-color: var(--dark-green);
+  transform: translateY(-3px);
+}
+
+/* ================================
+   COLLECTION TABS
+   ================================ */
+
+.collection-tabs {
+  display: inline-flex;
+  gap: 6px;
+  margin-bottom: 34px;
+  padding: 5px;
+  background-color: #e9efe9;
+  border-radius: 12px;
+}
+
+.collection-tab {
+  padding: 10px 16px;
+  color: var(--text-gray);
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.collection-tab:hover {
+  color: var(--primary-green);
+}
+
+.collection-tab.active {
+  color: var(--dark-green);
+  background-color: var(--white);
+  box-shadow: 0 3px 8px rgba(38, 52, 45, 0.1);
+}
+
+/* ================================
+   EMPTY STATE
+   ================================ */
+
+.collection-empty-state {
+  min-height: 380px;
+  padding: 55px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background-color: var(--white);
+  border: 1px dashed #cfd9d1;
+  border-radius: 24px;
+  text-align: center;
+}
+
+.collection-empty-icon {
+  width: 82px;
+  height: 82px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-orange);
+  background-color: var(--light-orange);
+  border-radius: 50%;
+  font-size: 2.3rem;
+}
+
+.collection-empty-state h2 {
+  margin-bottom: 11px;
+  color: var(--dark-green);
+  font-family: "Fraunces", serif;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.collection-empty-state p {
+  max-width: 390px;
+  margin-bottom: 25px;
+  color: var(--text-gray);
+  line-height: 1.6;
+}
+
+.collection-empty-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+  color: var(--primary-green);
+  border-bottom: 2px solid var(--primary-green);
+  font-weight: 700;
+}
+
+.collection-empty-button i {
+  transition: transform 0.25s ease;
+}
+
+.collection-empty-button:hover i {
+  transform: translateX(5px);
+}
+
+/* ================================
+   MOBILE DESIGN
+   ================================ */
+
+@media (max-width: 576px) {
+  .collections-section {
+    padding: 55px 0 70px;
+  }
+
+  .collections-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 32px;
+  }
+
+  .collections-heading h1 {
+    font-size: 2.8rem;
+  }
+
+  .collections-browse-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .collection-tabs {
+    width: 100%;
+  }
+
+  .collection-tab {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 0.82rem;
+  }
+
+  .collection-empty-state {
+    min-height: 330px;
+    padding: 45px 22px;
+  }
+
+  .collection-empty-state h2 {
+    font-size: 1.75rem;
+  }
+}
