@@ -1,0 +1,62 @@
+/* ================================
+   REGISTER PAGE (Cookly)
+   ================================ */
+
+@import url("Login.css"); /* Inherits base input and card styles */
+
+.register-card {
+  grid-template-columns: 1.08fr 0.92fr;
+}
+
+.register-card .login-image-panel {
+  order: 1;
+  margin: 20px 0 20px 20px;
+}
+
+.register-card .login-form-panel {
+  order: 2;
+  padding: 50px 65px;
+}
+
+.register-card .login-brand {
+  margin-bottom: 24px;
+}
+
+.register-card .login-brand-icon {
+  width: 64px;
+  height: 64px;
+  background-color: var(--dark-green);
+  border-radius: 18px;
+}
+
+.register-card .login-intro h1 {
+  font-size: 2.6rem;
+  letter-spacing: -0.05rem;
+}
+
+.register-card .login-form-group {
+  margin-bottom: 16px;
+}
+
+.register-card .login-submit-button {
+  margin-top: 10px;
+  background-color: var(--primary-green);
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+@media (max-width: 900px) {
+  .register-card {
+    grid-template-columns: 1fr;
+  }
+
+  .register-card .login-image-panel {
+    order: 2;
+    margin: 0 20px 20px;
+  }
+
+  .register-card .login-form-panel {
+    order: 1;
+    padding: 40px 30px;
+  }
+}

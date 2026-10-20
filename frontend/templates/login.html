@@ -2,159 +2,289 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <meta
       name="description"
       content="Cookly is a recipe-sharing platform for home cooks."
     />
+    <title>Account | Cookly</title>
 
-    <title>Login | Cookly</title>
-
-    <!-- Bootstrap Icons only -->
+    <!-- Icons & Fonts -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Cookly CSS Link -->
+    <!-- Cookly Styles -->
     <link rel="stylesheet" href="../static/css/Navbar.css" />
     <link rel="stylesheet" href="../static/css/Login.css" />
 
-    <!-- Cookly JavaScript -->
+    <!-- Cookly Scripts -->
     <script src="../static/js/navbar.js" defer></script>
-    <script src="../static/js/add-recipe.js" defer></script>
+    <script src="../static/js/auth.js" defer></script>
   </head>
 
   <body class="login-page">
     <main class="login-main">
-      <section class="login-card">
-        <!-- Login form panel -->
-        <div class="login-form-panel">
-          <a class="login-brand" href="home.html">
-            <span class="login-brand-icon">
-              <i class="bi bi-egg-fried" aria-hidden="true"></i>
-            </span>
-
-            <span>Cookly</span>
-          </a>
-
-          <div class="login-intro">
-            <h1>Welcome back!</h1>
-            <p>Sign in to save, create, and discover recipes.</p>
+      <section class="auth-card" id="authCard">
+        <!-- ==================== SIGN IN FORM ==================== -->
+        <div class="form-container sign-in-container">
+          <!-- Mobile Top Image Banner -->
+          <div class="mobile-banner">
+            <img
+              src="../static/images/creamy-tomato-pasta.jpg"
+              alt="Healthy choices meal bowl"
+            />
+            <div class="mobile-banner-overlay">
+              <h2>Healthy choices, made simple.</h2>
+              <p>Track meals and understand what you eat.</p>
+            </div>
           </div>
 
-          <form class="login-form" id="loginForm">
-            <!-- Email -->
-            <div class="login-form-group">
-              <label for="loginEmail">Email</label>
+          <div class="login-form-panel">
+            <a class="login-brand" href="home.html" aria-label="Cookly Home">
+              <span class="login-brand-icon">
+                <i class="bi bi-egg-fried" aria-hidden="true"></i>
+              </span>
+              <span class="login-brand-name">Cookly</span>
+            </a>
 
-              <input
-                type="email"
-                id="loginEmail"
-                name="email"
-                placeholder="name@example.com"
-                required
-              />
+            <div class="login-intro">
+              <h1>Welcome back!</h1>
+              <p>Let's continue your healthy journey.</p>
             </div>
 
-            <!-- Password -->
-            <div class="login-form-group">
-              <label for="loginPassword">Password</label>
-
-              <div class="password-input-wrapper">
+            <form class="login-form" id="loginForm">
+              <div class="login-form-group">
+                <label for="loginEmail">Email</label>
                 <input
-                  type="password"
-                  id="loginPassword"
-                  name="password"
-                  placeholder="Enter your password"
+                  type="email"
+                  id="loginEmail"
+                  name="email"
+                  placeholder="name@example.com"
                   required
                 />
+              </div>
+
+              <div class="login-form-group">
+                <label for="loginPassword">Password</label>
+                <div class="password-input-wrapper">
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                  <button
+                    class="password-toggle"
+                    type="button"
+                    data-target="loginPassword"
+                    aria-label="Toggle password visibility"
+                  >
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+
+              <a class="forgot-password-link" href="#">Forgot password?</a>
+
+              <button class="login-submit-button" type="submit">Sign In</button>
+
+              <!-- Social Logins -->
+              <div class="login-divider">
+                <span>Or continue with</span>
+              </div>
+
+              <div class="social-login-buttons">
+                <button
+                  class="social-google"
+                  type="button"
+                  aria-label="Continue with Google"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      fill="#4285F4"
+                      d="M21.35 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h5.23a4.47 4.47 0 0 1-1.94 2.93v2.79h3.14c1.84-1.69 2.92-4.19 2.92-7.15Z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.79c-.87.59-1.99.94-3.31.94-2.54 0-4.69-1.71-5.46-4.01H3.3v2.88A9.75 9.75 0 0 0 12 21.75Z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M6.54 13.53A5.87 5.87 0 0 1 6.24 12c0-.53.09-1.04.3-1.53V7.59H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.06 1.05 4.41l3.24-2.88Z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 6.46c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.52 14.63 2.25 12 2.25A9.75 9.75 0 0 0 3.3 7.59l3.24 2.88C7.31 8.17 9.46 6.46 12 6.46Z"
+                    />
+                  </svg>
+                </button>
 
                 <button
-                  class="password-toggle"
-                  id="passwordToggle"
+                  class="social-facebook"
                   type="button"
-                  aria-label="Show password"
+                  aria-label="Continue with Facebook"
                 >
-                  <i class="bi bi-eye" aria-hidden="true"></i>
+                  <i class="bi bi-facebook" aria-hidden="true"></i>
                 </button>
+              </div>
+
+              <p class="create-account-text">
+                Don't have an account?
+                <button type="button" class="switch-link" id="toSignUp">
+                  Create account
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+
+        <!-- ==================== CREATE ACCOUNT FORM ==================== -->
+        <div class="form-container sign-up-container">
+          <!-- Mobile Top Image Banner -->
+          <div class="mobile-banner">
+            <img
+              src="../static/images/avocado-bowl.jpg"
+              alt="Build healthier habits bowl"
+            />
+            <div class="mobile-banner-overlay">
+              <h2>Build healthier habits.</h2>
+              <p>Small improvements can create meaningful results.</p>
+            </div>
+          </div>
+
+          <div class="login-form-panel">
+            <a class="login-brand" href="home.html">
+            <a class="login-brand" href="home.html" aria-label="Cookly Home">
+  <span class="login-brand-icon">
+    <i class="bi bi-egg-fried" aria-hidden="true"></i>
+  </span>
+  <span class="login-brand-name">Cookly</span>
+</a>
+
+            <div class="login-intro">
+              <h1>Create account</h1>
+              <p>Start tracking your nutrition today.</p>
+            </div>
+
+            <form class="login-form" id="registerForm">
+              <div class="login-form-group">
+                <label for="fullName">Full name</label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  placeholder="Your name"
+                  required
+                />
+              </div>
+
+              <div class="login-form-group">
+                <label for="regEmail">Email</label>
+                <input
+                  type="email"
+                  id="regEmail"
+                  name="email"
+                  placeholder="name@example.com"
+                  required
+                />
+              </div>
+
+              <div class="login-form-group">
+                <label for="regPassword">Password</label>
+                <div class="password-input-wrapper">
+                  <input
+                    type="password"
+                    id="regPassword"
+                    name="password"
+                    placeholder="At least 8 characters"
+                    minlength="8"
+                    required
+                  />
+                  <button
+                    class="password-toggle"
+                    type="button"
+                    data-target="regPassword"
+                    aria-label="Toggle password visibility"
+                  >
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="login-form-group">
+                <label for="confirmPassword">Confirm password</label>
+                <div class="password-input-wrapper">
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="Enter password again"
+                    required
+                  />
+                  <button
+                    class="password-toggle"
+                    type="button"
+                    data-target="confirmPassword"
+                    aria-label="Toggle password visibility"
+                  >
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+
+              <button class="login-submit-button" type="submit">
+                Create Account
+              </button>
+
+              <p class="create-account-text">
+                Already have an account?
+                <button type="button" class="switch-link" id="toSignIn">
+                  Sign in
+                </button>
+              </p>
+
+              <p
+                class="login-message"
+                id="registerMessage"
+                aria-live="polite"
+              ></p>
+            </form>
+          </div>
+        </div>
+
+        <!-- ==================== DESKTOP SLIDING OVERLAY ==================== -->
+        <div class="overlay-container">
+          <div class="overlay">
+            <div class="overlay-panel overlay-left">
+              <img
+                src="../static/images/avocado-bowl.jpg"
+                alt="Build healthier habits bowl"
+              />
+              <div class="login-image-overlay">
+                <h2>Build healthier habits.</h2>
+                <p>Small improvements can create meaningful results.</p>
               </div>
             </div>
 
-            <a class="forgot-password-link" href="#">Forgot password?</a>
-
-            <!-- Submit button -->
-            <button class="login-submit-button" type="submit">Sign in</button>
-
-            <!-- Divider -->
-            <div class="login-divider">
-              <span>Or continue with</span>
+            <div class="overlay-panel overlay-right">
+              <img
+                src="../static/images/creamy-tomato-pasta.jpg"
+                alt="Healthy choices meal bowl"
+              />
+              <div class="login-image-overlay">
+                <h2>Healthy choices, made simple.</h2>
+                <p>Track meals and understand what you eat.</p>
+              </div>
             </div>
-
-            <!-- Social sign-in buttons -->
-            <div class="social-login-buttons">
-              <button
-                class="social-google"
-                type="button"
-                aria-label="Continue with Google"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path
-                    fill="#4285F4"
-                    d="M21.35 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h5.23a4.47 4.47 0 0 1-1.94 2.93v2.79h3.14c1.84-1.69 2.92-4.19 2.92-7.15Z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 21.75c2.63 0 4.84-.87 6.45-2.36l-3.14-2.79c-.87.59-1.99.94-3.31.94-2.54 0-4.69-1.71-5.46-4.01H3.3v2.88A9.75 9.75 0 0 0 12 21.75Z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M6.54 13.53A5.87 5.87 0 0 1 6.24 12c0-.53.09-1.04.3-1.53V7.59H3.3A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.06 1.05 4.41l3.24-2.88Z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 6.46c1.43 0 2.72.49 3.73 1.45l2.8-2.8C16.83 3.52 14.63 2.25 12 2.25A9.75 9.75 0 0 0 3.3 7.59l3.24 2.88C7.31 8.17 9.46 6.46 12 6.46Z"
-                  />
-                </svg>
-              </button>
-
-              <button type="button" aria-label="Continue with Facebook">
-                <i class="bi bi-facebook" aria-hidden="true"></i>
-              </button>
-            </div>
-
-            <!-- Register link -->
-            <p class="create-account-text">
-              Don't have an account?
-              <a href="register.html">Create account</a>
-            </p>
-
-            <p class="login-message" id="loginMessage" aria-live="polite"></p>
-          </form>
-        </div>
-
-        <!-- Food image panel -->
-        <div class="login-image-panel">
-          <img
-            src="../static/images/avocado-bowl.jpg"
-            alt="Fresh and healthy homemade meal"
-          />
-
-          <div class="login-image-overlay">
-            <p class="login-image-label">Cook something wonderful</p>
-
-            <h2>Great recipes start here.</h2>
-
-            <p>Save ideas, share meals, and cook with confidence.</p>
           </div>
         </div>
       </section>
