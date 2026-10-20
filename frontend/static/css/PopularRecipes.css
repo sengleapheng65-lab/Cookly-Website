@@ -182,6 +182,24 @@
 }
 
 /* ================================
+   SEARCH RESULTS
+   ================================ */
+
+.recipe-card.is-hidden {
+  display: none;
+}
+
+.search-message {
+  min-height: 22px;
+  margin: 12px 0 0;
+  padding-left: 12px;
+
+  color: var(--text-gray);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+/* ================================
    RECIPE INFORMATION
    ================================ */
 

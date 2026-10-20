@@ -56,15 +56,15 @@
         <!-- Navigation links -->
         <ul class="navbar_menu" id="navbarMenu">
           <li class="item">
-            <a class="nav_link active" href="#">Home</a>
+            <a class="nav_link active" href="#home">Home</a>
           </li>
 
           <li class="item">
-            <a class="nav_link" href="#">Browse Recipes</a>
+            <a class="nav_link" href="browse.html">Browse Recipes</a>
           </li>
 
           <li class="item">
-            <a class="nav_link" href="#">Add Recipe</a>
+            <a class="nav_link" href="add-recipe.html">Add Recipe</a>
           </li>
 
           <li class="item">
@@ -104,7 +104,7 @@
          ================================ -->
 
     <main>
-      <section class="hero-section">
+      <section class="hero-section" id="home">
         <div class="page-container hero-grid">
           <!-- Hero text -->
           <div class="hero-content">
@@ -139,7 +139,7 @@
               <a href="#">Vegan</a>
             </div>
 
-            <a class="share-recipe-link" href="#">
+            <a class="share-recipe-link" href="#share-recipe">
               Share a recipe
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
@@ -194,7 +194,7 @@
      POPULAR RECIPES SECTION
      ================================ -->
 
-      <section class="popular-recipes-section">
+      <section class="popular-recipes-section" id="recipes">
         <div class="page-container">
           <!-- Section heading -->
           <div class="section-heading">
@@ -204,7 +204,7 @@
             </div>
 
             <!-- Link to all recipes -->
-            <a class="view-all-link" href="#">
+            <a class="view-all-link" id="viewAllRecipes" href="#">
               View all recipes
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
@@ -213,7 +213,7 @@
           <!-- Recipe card grid -->
           <div class="recipe-grid">
             <!-- Recipe card 1 -->
-            <article class="recipe-card">
+            <article class="recipe-card" data-category="pasta">
               <div class="recipe-image recipe-image-pasta">
                 <!-- Recipe category -->
                 <span class="recipe-category">Pasta</span>
@@ -247,7 +247,7 @@
             </article>
 
             <!-- Recipe card 2 -->
-            <article class="recipe-card">
+            <article class="recipe-card" data-category="healthy">
               <div class="recipe-image recipe-image-bowl">
                 <!-- Recipe category -->
                 <span class="recipe-category">Healthy</span>
@@ -281,7 +281,7 @@
             </article>
 
             <!-- Recipe card 3 -->
-            <article class="recipe-card">
+            <article class="recipe-card" data-category="dinner">
               <div class="recipe-image recipe-image-chicken">
                 <!-- Recipe category -->
                 <span class="recipe-category">Dinner</span>
@@ -321,7 +321,7 @@
      RECIPE CATEGORIES SECTION
      ================================ -->
 
-      <section class="categories-section">
+      <section class="categories-section" id="categories">
         <div class="page-container">
           <!-- Section heading -->
           <div class="section-heading categories-heading">
@@ -400,7 +400,7 @@
      SHARE RECIPE CTA SECTION
      ================================ -->
 
-      <section class="share-cta-section">
+      <section class="share-cta-section" id="share-recipe">
         <div class="page-container">
           <div class="share-cta-card">
             <!-- CTA text -->

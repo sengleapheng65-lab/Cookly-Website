@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="description"
+      content="Cookly is a recipe-sharing platform for home cooks."
+    />
+
+    <title>Add a Recipe | Cookly</title>
+
+    <!-- Bootstrap Icons only -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Cookly CSS Link -->
+    <link rel="stylesheet" href="../static/css/Navbar.css" />
+    <link rel="stylesheet" href="../static/css/Intro.css" />
+    <link rel="stylesheet" href="../static/css/PopularRecipes.css" />
+    <link rel="stylesheet" href="../static/css/BrowseRecipes.css" />
+    <link rel="stylesheet" href="../static/css/Categories.css" />
+    <link rel="stylesheet" href="../static/css/ShareCTA.css" />
+    <link rel="stylesheet" href="../static/css/Footer.css" />
+
+    <!-- Cookly JavaScript -->
+    <script src="../static/js/main.js" defer></script>
+  </head>
+
+  <body>
+    <!-- ================================
+     NAVIGATION
+     ================================ -->
+
+    <header class="navbar">
+      <nav class="navbar_container">
+        <!-- Cookly logo -->
+        <a class="cookly_brand" href="home.html">
+          <span id="nav_logo" aria-hidden="true">
+            <span class="logo_egg"></span>
+          </span>
+
+          <span>Cookly</span>
+        </a>
+
+        <!-- Navigation links -->
+        <ul class="navbar_menu" id="navbarMenu">
+          <li class="item">
+            <a class="nav_link" href="home.html">Home</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link active" href="browse.html">Browse Recipes</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="home.html#share-recipe">Add Recipe</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="#">My Collections</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_link" href="#">Login</a>
+          </li>
+
+          <li class="item">
+            <a class="nav_button" href="#">
+              Register
+              <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Hamburger button -->
+        <button
+          class="navbar_toggle"
+          id="navbarToggle"
+          type="button"
+          aria-label="Open navigation menu"
+          aria-controls="navbarMenu"
+          aria-expanded="false"
+        >
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ================================
+       BROWSE RECIPES PAGE
+       ================================ -->
+
+      <section class="browse-hero-section">
+        <div class="page-container">
+          <!-- Page introduction -->
+          <div class="browse-page-heading">
+            <p class="section-label">Explore Cookly</p>
+            <h1>Browse delicious recipes</h1>
+            <p>
+              Find simple meals, comforting favorites, and new ideas for every
+              day.
+            </p>
+          </div>
+
+          <!-- Recipe search -->
+          <form class="browse-search-form">
+            <i class="bi bi-search" aria-hidden="true"></i>
+
+            <input
+              type="search"
+              placeholder="Search recipes, cuisines, or ingredients..."
+              aria-label="Search recipes"
+            />
+
+            <button type="submit">Search</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================================
+       RECIPE FILTERS AND RESULTS
+       ================================ -->
+
+      <section class="browse-results-section">
+        <div class="page-container">
+          <!-- Filter buttons -->
+          <div class="recipe-filter-bar">
+            <button
+              class="recipe-filter active"
+              type="button"
+              data-filter="all"
+            >
+              All Recipes
+            </button>
+
+            <button class="recipe-filter" type="button" data-filter="pasta">
+              Pasta
+            </button>
+
+            <button class="recipe-filter" type="button" data-filter="healthy">
+              Healthy
+            </button>
+
+            <button class="recipe-filter" type="button" data-filter="dinner">
+              Dinner
+            </button>
+
+            <button
+              class="recipe-filter"
+              type="button"
+              data-filter="quick-meals"
+            >
+              Quick Meals
+            </button>
+          </div>
+
+          <!-- Results heading -->
+          <div class="browse-results-heading">
+            <h2>Featured recipes</h2>
+            <p>Handpicked favorites from the Cookly community.</p>
+          </div>
+
+          <!-- Recipe card grid -->
+          <div class="recipe-grid">
+            <!-- Recipe card 1 -->
+            <article class="recipe-card" data-category="pasta">
+              <div class="recipe-image recipe-image-pasta">
+                <span class="recipe-category">Pasta</span>
+
+                <button
+                  class="save-recipe"
+                  type="button"
+                  aria-label="Save recipe"
+                >
+                  <i class="bi bi-heart" aria-hidden="true"></i>
+                </button>
+              </div>
+
+              <div class="recipe-card-content">
+                <h3>Creamy Tomato Pasta</h3>
+
+                <div class="recipe-details">
+                  <span>
+                    <i class="bi bi-clock" aria-hidden="true"></i>
+                    25 minutes
+                  </span>
+
+                  <span>
+                    <i class="bi bi-star-fill" aria-hidden="true"></i>
+                    4.9
+                  </span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Recipe card 2 -->
+            <article class="recipe-card" data-category="healthy">
+              <div class="recipe-image recipe-image-bowl">
+                <span class="recipe-category">Healthy</span>
+
+                <button
+                  class="save-recipe"
+                  type="button"
+                  aria-label="Save recipe"
+                >
+                  <i class="bi bi-heart" aria-hidden="true"></i>
+                </button>
+              </div>
+
+              <div class="recipe-card-content">
+                <h3>Fresh Avocado Bowl</h3>
+
+                <div class="recipe-details">
+                  <span>
+                    <i class="bi bi-clock" aria-hidden="true"></i>
+                    15 minutes
+                  </span>
+
+                  <span>
+                    <i class="bi bi-star-fill" aria-hidden="true"></i>
+                    4.8
+                  </span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Recipe card 3 -->
+            <article class="recipe-card" data-category="dinner">
+              <div class="recipe-image recipe-image-chicken">
+                <span class="recipe-category">Dinner</span>
+
+                <button
+                  class="save-recipe"
+                  type="button"
+                  aria-label="Save recipe"
+                >
+                  <i class="bi bi-heart" aria-hidden="true"></i>
+                </button>
+              </div>
+
+              <div class="recipe-card-content">
+                <h3>Herb Roasted Chicken</h3>
+
+                <div class="recipe-details">
+                  <span>
+                    <i class="bi bi-clock" aria-hidden="true"></i>
+                    45 minutes
+                  </span>
+
+                  <span>
+                    <i class="bi bi-star-fill" aria-hidden="true"></i>
+                    4.9
+                  </span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <p class="browse-empty-message" id="browseEmptyMessage" hidden>
+          No recipes match your search yet.
+        </p>
+      </section>
+    </main>
+
+    <!-- ================================
+     FOOTER
+     ================================ -->
+
+    <footer class="site-footer">
+      <div class="page-container">
+        <!-- Footer top content -->
+        <div class="footer-grid">
+          <!-- Brand information -->
+          <div class="footer-brand">
+            <a class="footer-logo" href="#">
+              <span class="footer-logo-mark">
+                <i class="bi bi-egg-fried" aria-hidden="true"></i>
+              </span>
+
+              <span>Cookly</span>
+            </a>
+
+            <p>
+              Discover, create, and share delicious recipes with home cooks
+              everywhere.
+            </p>
+          </div>
+
+          <!-- Explore links -->
+          <div class="footer-column">
+            <h3>Explore</h3>
+
+            <a href="#">Browse Recipes</a>
+            <a href="#">Popular Recipes</a>
+            <a href="#">Recipe Categories</a>
+          </div>
+
+          <!-- Community links -->
+          <div class="footer-column">
+            <h3>Community</h3>
+
+            <a href="#">Add a Recipe</a>
+            <a href="#">My Collections</a>
+            <a href="#">Login</a>
+          </div>
+
+          <!-- Social links -->
+          <div class="footer-column">
+            <h3>Follow Cookly</h3>
+
+            <div class="footer-socials">
+              <a href="#" aria-label="Instagram">
+                <i class="bi bi-instagram"></i>
+              </a>
+
+              <a href="#" aria-label="Pinterest">
+                <i class="bi bi-pinterest"></i>
+              </a>
+
+              <a href="#" aria-label="YouTube">
+                <i class="bi bi-youtube"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer bottom -->
+        <div class="footer-bottom">
+          <p>© 2026 Cookly. All rights reserved.</p>
+
+          <div class="footer-legal-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Use</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
