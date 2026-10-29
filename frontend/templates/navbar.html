@@ -1,0 +1,44 @@
+<nav class="navbar">
+  <div class="navbar_container">
+    <!-- Cookly Brand & Logo -->
+    <a href="{{ url_for('home') }}" class="cookly_brand">
+      <span id="nav_logo">
+        <span class="logo_egg"></span>
+      </span>
+      Cookly
+    </a>
+
+    <!-- Navigation Links -->
+    <ul class="navbar_menu" id="navbar_menu">
+      <li class="item">
+        <a href="{{ url_for('home') }}" class="nav_link">Home</a>
+      </li>
+
+      {% if session.get('user_id') %}
+      <!-- Authenticated Links -->
+      <li class="item">
+        <a href="{{ url_for('profile') }}" class="nav_link">My Profile</a>
+      </li>
+      <li class="item">
+        <a href="{{ url_for('logout') }}" class="nav_button">Log Out</a>
+      </li>
+      {% else %}
+      <!-- Guest Link -->
+      <li class="item">
+        <a href="{{ url_for('login') }}" class="nav_button">Sign In</a>
+      </li>
+      {% endif %}
+    </ul>
+
+    <!-- Mobile Hamburger Toggle -->
+    <button
+      class="navbar_toggle"
+      id="mobile_menu_toggle"
+      aria-label="Toggle Navigation"
+    >
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+  </div>
+</nav>
