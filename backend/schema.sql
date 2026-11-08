@@ -8,3 +8,51 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS cuisines (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS diet_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+INSERT IGNORE INTO categories (name) VALUES
+('Breakfast'),
+('Lunch'),
+('Dinner'),
+('Dessert'),
+('Soup'),
+('Snack'),
+('Salad'),
+('Drink');
+
+INSERT IGNORE INTO cuisines (name) VALUES
+("Italian"),
+('Mexican'),
+('American'),
+('Chinese'),
+('Korean'),
+('Thai'),
+('Indian'),
+('Middle Eastern'),
+('Caribbean');
+
+INSERT IGNORE INTO diet_types (name) VALUES
+('None'),
+('Vegetarian'),
+('Vegan'),
+('Gluten Free'),
+('Dairy Free'),
+('Nut Free'),
+('Keto'),
+('Pescatarian'),
+('Halal'),
+('Low Carb');
