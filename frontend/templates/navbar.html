@@ -1,5 +1,5 @@
-<nav class="navbar">
-  <div class="navbar_container">
+<header class="navbar">
+  <nav class="navbar_container">
     <!-- Cookly Brand & Logo -->
     <a href="{{ url_for('home') }}" class="cookly_brand">
       <span id="nav_logo">
@@ -9,15 +9,26 @@
     </a>
 
     <!-- Navigation Links -->
-    <ul class="navbar_menu" id="navbar_menu">
+    <ul class="navbar_menu" id="navbarMenu">
       <li class="item">
-        <a href="{{ url_for('home') }}" class="nav_link">Home</a>
+        <a href="{{ url_for('home') }}" class="nav_link {% if request.endpoint == 'home' %}active{% endif %}">Home</a>
+      </li>
+
+      <li class="item">
+        <a href="{{ url_for('browse') }}" class="nav_link {% if request.endpoint == 'browse' %}active{% endif %}">Browse Recipes</a>
+      </li>
+
+      <li class="item">
+        <a href="{{ url_for('add_recipe') }}" class="nav_link {% if request.endpoint == 'add_recipe' %}active{% endif %}">Add Recipe</a>
       </li>
 
       {% if session.get('user_id') %}
       <!-- Authenticated Links -->
       <li class="item">
-        <a href="{{ url_for('profile') }}" class="nav_link">My Profile</a>
+        <a href="{{ url_for('collections') }}" class="nav_link {% if request.endpoint == 'collections' %}active{% endif %}">Collections</a>
+      </li>
+      <li class="item">
+        <a href="{{ url_for('profile') }}" class="nav_link {% if request.endpoint == 'profile' %}active{% endif %}">My Profile</a>
       </li>
       <li class="item">
         <a href="{{ url_for('logout') }}" class="nav_button">Log Out</a>
@@ -33,12 +44,14 @@
     <!-- Mobile Hamburger Toggle -->
     <button
       class="navbar_toggle"
-      id="mobile_menu_toggle"
+      id="navbarToggle"
       aria-label="Toggle Navigation"
+      aria-controls="navbarMenu"
+      aria-expanded="false"
     >
       <span class="bar"></span>
       <span class="bar"></span>
       <span class="bar"></span>
     </button>
-  </div>
-</nav>
+  </nav>
+</header>

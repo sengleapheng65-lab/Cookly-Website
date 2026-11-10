@@ -21,6 +21,35 @@
   justify-content: center;
 }
 
+.server-flashes {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  z-index: 1100;
+  width: min(520px, calc(100% - 32px));
+  transform: translateX(-50%);
+}
+
+.server-flash {
+  margin: 0 0 8px;
+  padding: 13px 17px;
+  color: #174532;
+  background: #e9f7ee;
+  border: 1px solid #b9e2c5;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 35, 24, 0.16);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.server-flash.error,
+.server-flash.register_error {
+  color: #8f2d24;
+  background: #fff0ed;
+  border-color: #f0b7ae;
+}
+
 /* ================================
    SLIDING AUTH CONTAINER
    ================================ */

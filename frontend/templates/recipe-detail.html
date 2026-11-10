@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ recipe.title }} - Cookly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navbar.css') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet" />
+    <style>
+      body { margin: 0; background: #f7f8f6; color: #26342d; font-family: "DM Sans", sans-serif; }
+      .detail-page { max-width: 1180px; margin: 48px auto; padding: 0 28px 80px; }
+      .detail-card { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); overflow: hidden; background: #fff; border-radius: 24px; box-shadow: 0 16px 38px rgba(38, 52, 45, .1); }
+      .detail-image { width: 100%; height: 100%; min-height: 620px; object-fit: cover; background: #e9efeb; display: block; }
+      .detail-content { padding: 58px 54px 54px; }
+      .detail-content h1 { margin: 0 0 16px; color: #174f3a; font-family: "Fraunces", serif; font-size: clamp(2.4rem, 4vw, 4.2rem); line-height: 1.02; letter-spacing: -.04em; }
+      .detail-meta { color: #68756e; font-size: .95rem; }
+      .detail-description { margin: 28px 0; color: #56635c; line-height: 1.75; }
+      .detail-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 34px; padding-top: 28px; border-top: 1px solid #e7dfd3; }
+      .detail-columns h2 { color: #174f3a; font-family: "Fraunces", serif; font-size: 1.7rem; }
+      .detail-text { white-space: pre-line; color: #56635c; line-height: 1.7; }
+      .back-link { display: inline-block; margin-bottom: 20px; color: #1f5c42; font-weight: 700; text-decoration: none; }
+      @media (max-width: 800px) { .detail-card { grid-template-columns: 1fr; } .detail-image { height: 320px; min-height: 0; } .detail-content { padding: 36px 28px 40px; } }
+      @media (max-width: 560px) { .detail-columns { grid-template-columns: 1fr; } .detail-page { margin: 28px auto; padding: 0 16px 56px; } .detail-image { height: 260px; } }
+    </style>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <main class="detail-page">
+      <a class="back-link" href="{{ url_for('browse') }}">← Back to recipes</a>
+      <article class="detail-card">
+        {% if recipe.image_filename %}
+        <img class="detail-image" src="{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}" alt="{{ recipe.title }}" />
+        {% endif %}
+        <div class="detail-content">
+          <h1>{{ recipe.title }}</h1>
+          <p class="detail-meta">By {{ recipe.author_name }} · {{ recipe.category_name }} · {{ recipe.cuisine_name }} · {{ recipe.difficulty }} · {{ recipe.cooking_time_minutes }} minutes</p>
+          <p class="detail-description">{{ recipe.description }}</p>
+          <div class="detail-columns">
+            <section><h2>Ingredients</h2><div class="detail-text">{{ recipe.ingredients }}</div></section>
+            <section><h2>Instructions</h2><div class="detail-text">{{ recipe.instructions }}</div></section>
+          </div>
+        </div>
+      </article>
+    </main>
+  </body>
+</html>

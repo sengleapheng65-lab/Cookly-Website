@@ -73,6 +73,7 @@
    ================================ */
 
 .recipe-card {
+  position: relative;
   overflow: hidden;
   background-color: var(--white);
   border: 1px solid var(--border-color);
@@ -83,9 +84,26 @@
     box-shadow 0.3s ease;
 }
 
+.recipe-card > form {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+}
+
+.recipe-card > form .save-recipe {
+  position: static;
+}
+
 .recipe-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 45px rgba(38, 52, 45, 0.15);
+}
+
+.recipe-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* ================================

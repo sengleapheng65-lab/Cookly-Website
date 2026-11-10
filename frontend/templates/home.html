@@ -62,27 +62,33 @@
           </li>
 
           <li class="item">
-            <a class="nav_link" href="browse.html">Browse Recipes</a>
+            <a class="nav_link" href="{{ url_for('browse') }}">Browse Recipes</a>
           </li>
 
           <li class="item">
-            <a class="nav_link" href="add-recipe.html">Add Recipe</a>
+            <a class="nav_link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
           </li>
 
+          {% if session.get('user_id') %}
           <li class="item">
-            <a class="nav_link" href="collections.html">My Collections</a>
+            <a class="nav_link" href="{{ url_for('collections') }}">Collections</a>
           </li>
-
           <li class="item">
-            <a class="nav_link" href="login.html">Login</a>
+            <a class="nav_link" href="{{ url_for('profile') }}">My Profile</a>
           </li>
-
           <li class="item">
-            <a class="nav_button" href="login.html#register">
-              Register
-              <i class="bi bi-arrow-up-right"></i>
+            <a class="nav_button" href="{{ url_for('logout') }}">Log Out</a>
+          </li>
+          {% else %}
+          <li class="item">
+            <a class="nav_link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          <li class="item">
+            <a class="nav_button" href="{{ url_for('login') }}#register">
+              Register <i class="bi bi-arrow-up-right"></i>
             </a>
           </li>
+          {% endif %}
         </ul>
 
         <!-- Hamburger button -->
@@ -206,7 +212,7 @@
             </div>
 
             <!-- Link to all recipes -->
-            <a class="view-all-link" id="viewAllRecipes" href="browse.html">
+            <a class="view-all-link" id="viewAllRecipes" href="{{ url_for('browse') }}">
               View all recipes
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>

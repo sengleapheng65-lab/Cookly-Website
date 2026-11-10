@@ -12,6 +12,12 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/Footer.css') }}"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         box-sizing: border-box;
@@ -19,26 +25,24 @@
         padding: 0;
       }
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
-        background-color: #f8f9fa;
-        color: #333;
+        font-family: "DM Sans", sans-serif;
+        background-color: #f7f8f6;
+        color: #26342d;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
       .profile-wrapper {
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 0 20px;
+        max-width: 1120px;
+        margin: 56px auto;
+        padding: 0 28px 64px;
         flex: 1;
         width: 100%;
       }
       .profile-card {
         background: #ffffff;
         border-radius: 12px;
-        padding: 30px;
+        padding: 30px 34px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         margin-bottom: 40px;
         display: flex;
@@ -59,9 +63,11 @@
         text-transform: uppercase;
       }
       .profile-info h1 {
-        font-size: 24px;
+        color: #174f3a;
+        font-family: "Fraunces", serif;
+        font-size: 30px;
+        font-weight: 700;
         margin-bottom: 6px;
-        color: #1a1a1a;
       }
       .profile-info p {
         color: #666;
@@ -75,8 +81,10 @@
         margin-bottom: 20px;
       }
       .section-header h2 {
-        font-size: 20px;
-        color: #1a1a1a;
+        color: #174f3a;
+        font-family: "Fraunces", serif;
+        font-size: 28px;
+        font-weight: 700;
       }
       .btn-logout {
         background-color: #f1f3f5;
@@ -92,8 +100,8 @@
       }
       .recipes-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
       }
       .recipe-card {
         background: white;
@@ -101,26 +109,69 @@
         overflow: hidden;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         border: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+      }
+      .recipe-card-link {
+        color: inherit;
+        display: block;
+        text-decoration: none;
       }
       .recipe-image {
         width: 100%;
-        height: 160px;
+        height: 210px;
         object-fit: cover;
         background-color: #f1f3f5;
+        display: block;
       }
       .recipe-body {
         padding: 16px;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
       }
       .recipe-title {
-        font-size: 16px;
+        color: #174f3a;
+        font-family: "Fraunces", serif;
+        font-size: 19px;
         font-weight: bold;
         margin-bottom: 8px;
-        color: #222;
       }
       .recipe-desc {
         font-size: 13px;
         color: #666;
         line-height: 1.4;
+      }
+      .recipe-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 16px;
+      }
+      .recipe-action {
+        border: 0;
+        border-radius: 7px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 700;
+        min-height: 38px;
+        padding: 0 16px;
+        text-decoration: none;
+      }
+      .recipe-action.edit {
+        background: #f1f3f5;
+        color: #e03131;
+      }
+      .recipe-action.delete {
+        background: #fff0f0;
+        color: #c92a2a;
+      }
+      .recipe-action:hover {
+        filter: brightness(0.96);
       }
       .empty-state {
         background: white;
@@ -145,6 +196,47 @@
         <div class="profile-info" style="flex: 1">
           <h1>{{ user.full_name if user else 'User' }}</h1>
         </div>
+      </div>
+
+      <div class="section-header">
+        <h2>My recipes</h2>
+        <a class="btn-logout" href="{{ url_for('add_recipe') }}">Add recipe</a>
+      </div>
+
+      <div class="recipes-grid">
+        {% for recipe in recipes %}
+        <article class="recipe-card">
+          <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
+            {% if recipe.image_filename %}
+            <img
+              class="recipe-image"
+              src="{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}"
+              alt="{{ recipe.title }}"
+            />
+            {% endif %}
+            <div class="recipe-body">
+              <h3 class="recipe-title">{{ recipe.title }}</h3>
+              <p class="recipe-desc">{{ recipe.description }}</p>
+              <p class="recipe-desc">
+                {{ recipe.difficulty }} · {{ recipe.cooking_time_minutes }} minutes ·
+                {{ recipe.serving_size }} servings
+              </p>
+            </div>
+          </a>
+          <div class="recipe-body">
+            <div class="recipe-actions">
+              <a class="recipe-action edit" href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}">Edit</a>
+              <form method="POST" action="{{ url_for('delete_recipe', recipe_id=recipe.id) }}">
+                <button class="recipe-action delete" type="submit" onclick="return confirm('Delete this recipe?')">Delete</button>
+              </form>
+            </div>
+          </div>
+        </article>
+        {% else %}
+        <div class="empty-state">
+          <p>You have not created any recipes yet.</p>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </body>

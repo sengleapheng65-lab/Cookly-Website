@@ -45,64 +45,7 @@
      NAVIGATION
      ================================ -->
 
-    <header class="navbar">
-      <nav class="navbar_container">
-        <!-- Cookly logo -->
-        <a class="cookly_brand" href="home.html">
-          <span id="nav_logo" aria-hidden="true">
-            <span class="logo_egg"></span>
-          </span>
-
-          <span>Cookly</span>
-        </a>
-
-        <!-- Navigation links -->
-        <ul class="navbar_menu" id="navbarMenu">
-          <li class="item">
-            <a class="nav_link" href="home.html">Home</a>
-          </li>
-
-          <li class="item">
-            <a class="nav_link" href="browse.html">Browse Recipes</a>
-          </li>
-
-          <li class="item">
-            <a class="nav_link" href="add-recipe.html">Add Recipe</a>
-          </li>
-
-          <li class="item">
-            <a class="nav_link active" href="collections.html"
-              >My Collections</a
-            >
-          </li>
-
-          <li class="item">
-            <a class="nav_link" href="login.html">Login</a>
-          </li>
-
-          <li class="item">
-            <a class="nav_button" href="login.html#registerr">
-              Register
-              <i class="bi bi-arrow-up-right"></i>
-            </a>
-          </li>
-        </ul>
-
-        <!-- Hamburger button -->
-        <button
-          class="navbar_toggle"
-          id="navbarToggle"
-          type="button"
-          aria-label="Open navigation menu"
-          aria-controls="navbarMenu"
-          aria-expanded="false"
-        >
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
-        </button>
-      </nav>
-    </header>
+    {% include 'navbar.html' %}
 
     <main>
       <!-- ================================
@@ -119,7 +62,7 @@
               <p>Keep your favorite recipes in one easy-to-find place.</p>
             </div>
 
-            <a class="collections-browse-button" href="browse.html">
+            <a class="collections-browse-button" href="{{ url_for('browse') }}">
               Browse recipes
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
@@ -150,6 +93,37 @@
             </button>
           </div>
 
+          <div id="savedCollection" class="collection-content">
+          {% if saved_recipes %}
+          <div class="recipe-grid">
+            {% for recipe in saved_recipes %}
+            <article class="recipe-card">
+              <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
+                <div
+                  class="recipe-image recipe-image-bowl"
+                  {% if recipe.image_filename %}
+                  style="background-image: url('{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}');"
+                  {% endif %}
+                >
+                  <span class="recipe-category">{{ recipe.category_name }}</span>
+                </div>
+                <div class="recipe-card-content">
+                  <h3>{{ recipe.title }}</h3>
+                  <div class="recipe-details">
+                    <span><i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.cooking_time_minutes }} minutes</span>
+                    <span>{{ recipe.difficulty }}</span>
+                  </div>
+                </div>
+              </a>
+              <form method="POST" action="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}">
+                <button class="save-recipe saved" type="submit" aria-label="Remove from collections">
+                  <i class="bi bi-heart-fill" aria-hidden="true"></i>
+                </button>
+              </form>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
           <!-- Empty saved-recipes state -->
           <div class="collection-empty-state">
             <div
@@ -169,11 +143,48 @@
             <a
               class="collection-empty-button"
               id="collectionEmptyLink"
-              href="browse.html"
+              href="{{ url_for('browse') }}"
             >
               Explore recipes
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
+          </div>
+          {% endif %}
+          </div>
+
+          <div id="createdCollection" class="collection-content" hidden>
+          {% if created_recipes %}
+          <div class="recipe-grid">
+            {% for recipe in created_recipes %}
+            <article class="recipe-card">
+              <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
+                <div
+                  class="recipe-image recipe-image-bowl"
+                  {% if recipe.image_filename %}
+                  style="background-image: url('{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}');"
+                  {% endif %}
+                >
+                  <span class="recipe-category">{{ recipe.category_name }}</span>
+                </div>
+                <div class="recipe-card-content">
+                  <h3>{{ recipe.title }}</h3>
+                  <div class="recipe-details">
+                    <span><i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.cooking_time_minutes }} minutes</span>
+                    <span>{{ recipe.difficulty }}</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="collection-empty-state">
+            <div class="collection-empty-icon" aria-hidden="true"><i class="bi bi-journal-plus"></i></div>
+            <h2>No recipes created yet</h2>
+            <p>Share your first recipe with the Cookly community.</p>
+            <a class="collection-empty-button" href="{{ url_for('add_recipe') }}">Add a recipe <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+          </div>
+          {% endif %}
           </div>
         </div>
       </section>
