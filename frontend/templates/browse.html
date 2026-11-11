@@ -126,11 +126,13 @@
           </div>
 
           <!-- Recipe search -->
-          <form class="browse-search-form" id="recipeSearch">
+          <form class="browse-search-form" id="recipeSearch" action="{{ url_for('browse') }}" method="GET" data-server-search="true">
             <i class="bi bi-search" aria-hidden="true"></i>
 
             <input
               type="search"
+              name="q"
+              value="{{ search_term }}"
               placeholder="Search recipes, cuisines, or ingredients..."
               id="searchInput"
               aria-label="Search recipes"

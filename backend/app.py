@@ -25,7 +25,38 @@ ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    conn = get_db_connection()
+    popular_recipes = []
+
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        current_user_id = session.get('user_id', 0)
+        cursor.execute(
+            """
+            SELECT r.id, r.title, r.cooking_time_minutes, r.image_filename,
+                   r.created_at, c.name AS category_name,
+                   COUNT(weekly_saves.recipe_id) AS weekly_saves,
+                   CASE WHEN user_saves.recipe_id IS NULL THEN 0 ELSE 1 END AS is_saved
+            FROM recipes r
+            LEFT JOIN categories c ON r.catergory_id = c.id
+            LEFT JOIN saved_recipes weekly_saves
+              ON weekly_saves.recipe_id = r.id
+             AND weekly_saves.saved_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            LEFT JOIN saved_recipes user_saves
+              ON user_saves.recipe_id = r.id
+             AND user_saves.user_id = %s
+            GROUP BY r.id, r.title, r.cooking_time_minutes, r.image_filename,
+                     r.created_at, c.name, user_saves.recipe_id
+            ORDER BY weekly_saves DESC, r.created_at DESC
+            LIMIT 3
+            """,
+            (current_user_id,),
+        )
+        popular_recipes = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+    return render_template('home.html', popular_recipes=popular_recipes)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -383,8 +414,23 @@ def browse():
     if conn:
         cursor = conn.cursor(dictionary=True)
         current_user_id = session.get('user_id', 0)
-        cursor.execute(
+        search_term = request.args.get('q', '').strip()
+        search_clause = ''
+        query_params = [current_user_id]
+
+        if search_term:
+            search_clause = """
+                AND (
+                    r.title LIKE %s OR r.description LIKE %s OR
+                    r.ingredients LIKE %s OR c.name LIKE %s OR
+                    cu.name LIKE %s OR d.name LIKE %s
+                )
             """
+            search_value = f'%{search_term}%'
+            query_params.extend([search_value] * 6)
+
+        cursor.execute(
+            f"""
             SELECT r.*, c.name AS category_name, cu.name AS cuisine_name,
                    d.name AS diet_name, s.recipe_id IS NOT NULL AS is_saved
             FROM recipes r
@@ -393,15 +439,21 @@ def browse():
             LEFT JOIN diet_types d ON r.diet_type_id = d.id
             LEFT JOIN saved_recipes s
               ON s.recipe_id = r.id AND s.user_id = %s
+            WHERE 1=1
+            {search_clause}
             ORDER BY r.created_at DESC
             """,
-            (current_user_id,),
+            query_params,
         )
         recipes = cursor.fetchall()
         cursor.close()
         conn.close()
 
-    return render_template('browse.html', recipes=recipes)
+    return render_template(
+        'browse.html',
+        recipes=recipes,
+        search_term=request.args.get('q', '').strip(),
+    )
 
 
 @app.route('/recipes/<int:recipe_id>')
@@ -494,7 +546,7 @@ def profile():
     cursor = conn.cursor(dictionary=True)
     
     # Fetch account details
-    cursor.execute("SELECT id, full_name, email, created_at FROM users WHERE id = %s", (session['user_id'],))
+    cursor.execute("SELECT id, full_name, email, profile_image_filename, created_at FROM users WHERE id = %s", (session['user_id'],))
     user = cursor.fetchone()
 
     # Fetch user's recipes (safely handles case where recipes table isn't created yet)
@@ -509,6 +561,134 @@ def profile():
         conn.close()
 
     return render_template('profile.html', user=user, recipes=recipes)
+
+
+@app.route('/profile/edit', methods=['GET', 'POST'])
+def edit_profile():
+    if 'user_id' not in session:
+        flash('Please sign in to edit your profile.', 'error')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('profile'))
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        'SELECT id, full_name, email, profile_image_filename FROM users WHERE id = %s',
+        (session['user_id'],),
+    )
+    user = cursor.fetchone()
+
+    if request.method == 'GET':
+        cursor.close()
+        conn.close()
+        return render_template('profile-edit.html', user=user)
+
+    full_name = request.form.get('fullName', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    profile_image = request.files.get('profileImage')
+
+    if not full_name or not email:
+        cursor.close()
+        conn.close()
+        flash('Name and email are required.', 'error')
+        return redirect(url_for('edit_profile'))
+
+    new_profile_image = None
+    if profile_image and profile_image.filename:
+        original_filename = secure_filename(profile_image.filename)
+        extension = original_filename.rsplit('.', 1)[-1].lower() if '.' in original_filename else ''
+        if extension not in ALLOWED_IMAGE_EXTENSIONS:
+            cursor.close()
+            conn.close()
+            flash('Please upload a JPG, PNG, GIF, or WEBP image.', 'error')
+            return redirect(url_for('edit_profile'))
+        new_profile_image = f'profile-{uuid.uuid4().hex}.{extension}'
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        profile_image.save(os.path.join(UPLOAD_DIR, new_profile_image))
+
+    try:
+        if new_profile_image:
+            cursor.execute(
+                'UPDATE users SET full_name = %s, email = %s, profile_image_filename = %s WHERE id = %s',
+                (full_name, email, new_profile_image, session['user_id']),
+            )
+        else:
+            cursor.execute(
+                'UPDATE users SET full_name = %s, email = %s WHERE id = %s',
+                (full_name, email, session['user_id']),
+            )
+        conn.commit()
+    except mysql.connector.Error as error:
+        conn.rollback()
+        cursor.close()
+        conn.close()
+        if error.errno == 1062:
+            flash('That email is already in use.', 'error')
+        else:
+            flash('Unable to update your profile.', 'error')
+        return redirect(url_for('edit_profile'))
+
+    old_profile_image = user.get('profile_image_filename')
+    cursor.close()
+    conn.close()
+    if new_profile_image and old_profile_image:
+        old_image_path = os.path.join(UPLOAD_DIR, old_profile_image)
+        if os.path.exists(old_image_path):
+            os.remove(old_image_path)
+    session['user_name'] = full_name
+    flash('Profile updated successfully!', 'success')
+    return redirect(url_for('profile'))
+
+
+@app.route('/profile/password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        flash('Please sign in to change your password.', 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('change-password.html')
+
+    current_password = request.form.get('currentPassword', '')
+    new_password = request.form.get('newPassword', '')
+    confirm_password = request.form.get('confirmPassword', '')
+
+    if len(new_password) < 8:
+        flash('Your new password must be at least 8 characters.', 'error')
+        return redirect(url_for('change_password'))
+
+    if new_password != confirm_password:
+        flash('The new passwords do not match.', 'error')
+        return redirect(url_for('change_password'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('profile'))
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT password_hash FROM users WHERE id = %s', (session['user_id'],))
+    user = cursor.fetchone()
+
+    if not user or not check_password_hash(user['password_hash'], current_password):
+        cursor.close()
+        conn.close()
+        flash('Your current password is incorrect.', 'error')
+        return redirect(url_for('change_password'))
+
+    cursor.execute(
+        'UPDATE users SET password_hash = %s WHERE id = %s',
+        (generate_password_hash(new_password), session['user_id']),
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Password changed successfully.', 'success')
+    return redirect(url_for('profile'))
 
 
 @app.route('/logout')

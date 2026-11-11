@@ -187,6 +187,11 @@
    ================================ */
 
 @media (max-width: 576px) {
+  .browse-hero-section .page-container,
+  .browse-results-section .page-container {
+    width: calc(100% - 32px);
+  }
+
   .browse-hero-section {
     padding: 52px 0 45px;
   }
@@ -196,7 +201,8 @@
   }
 
   .browse-page-heading h1 {
-    font-size: 2.75rem;
+    font-size: 2.35rem;
+    line-height: 1.08;
     letter-spacing: -0.08rem;
   }
 
@@ -206,14 +212,20 @@
 
   .browse-search-form {
     flex-wrap: wrap;
+    gap: 6px;
+    padding: 7px;
+    border-radius: 14px;
   }
 
   .browse-search-form input {
-    width: calc(100% - 45px);
+    width: calc(100% - 40px);
+    padding: 12px 4px;
+    font-size: 0.92rem;
   }
 
   .browse-search-form button {
     width: 100%;
+    padding: 12px;
   }
 
   .browse-results-section {
@@ -222,11 +234,89 @@
 
   .recipe-filter-bar {
     justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
     margin-bottom: 38px;
+    scrollbar-width: none;
+  }
+
+  .recipe-filter-bar::-webkit-scrollbar {
+    display: none;
   }
 
   .recipe-filter {
+    flex: 0 0 auto;
     padding: 9px 15px;
+    font-size: 0.85rem;
+  }
+
+  .browse-results-heading h2 {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
+
+  .browse-results-heading p {
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .recipe-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .recipe-card {
+    min-width: 0;
+    border-radius: 16px;
+  }
+
+  .recipe-image {
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+
+  .recipe-category {
+    top: 12px;
+    left: 12px;
+    padding: 7px 11px;
+    font-size: 0.72rem;
+  }
+
+  .recipe-card > form {
+    top: 11px;
+    right: 11px;
+  }
+
+  .recipe-card > form .save-recipe {
+    width: 38px;
+    height: 38px;
+  }
+
+  .recipe-card-content {
+    padding: 18px;
+  }
+
+  .recipe-card-content h3 {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  .recipe-details {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .browse-page-heading h1 {
+    font-size: 2.1rem;
+  }
+
+  .browse-search-form input {
     font-size: 0.85rem;
   }
 }

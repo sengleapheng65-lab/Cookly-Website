@@ -6,7 +6,12 @@ const recipeSearch = document.getElementById("recipeSearch");
 const searchInput = document.getElementById("searchInput");
 const recipeCards = document.querySelectorAll(".recipe-card");
 
-if (recipeSearch && searchInput && recipeCards.length > 0) {
+if (
+  recipeSearch &&
+  searchInput &&
+  recipeCards.length > 0 &&
+  !recipeSearch.dataset.serverSearch
+) {
   const searchMessage = document.createElement("p");
 
   searchMessage.className = "search-message";
