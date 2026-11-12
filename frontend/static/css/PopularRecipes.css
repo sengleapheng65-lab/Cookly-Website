@@ -3,7 +3,7 @@
    ================================ */
 
 .popular-recipes-section {
-  padding: 90px 0;
+  padding: clamp(64px, 8vw, 96px) 0;
   background-color: var(--white);
 }
 
@@ -82,6 +82,12 @@
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
+  scroll-margin-top: 125px;
+}
+
+.recipe-card:focus-within {
+  border-color: rgba(31, 92, 66, 0.5);
+  box-shadow: 0 0 0 4px rgba(31, 92, 66, 0.1), 0 20px 45px rgba(38, 52, 45, 0.15);
 }
 
 .recipe-card > form {
@@ -92,6 +98,24 @@
 }
 
 .recipe-card > form .save-recipe {
+  position: static;
+}
+
+.recipe-card-actions {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.recipe-card-actions form {
+  display: contents;
+}
+
+.recipe-card-actions .save-recipe,
+.recipe-card-actions .like-recipe {
   position: static;
 }
 
@@ -178,6 +202,28 @@
     transform 0.25s ease;
 }
 
+.like-recipe {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-green);
+  background-color: rgba(255, 255, 255, 0.92);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: color 0.25s ease, background-color 0.25s ease, transform 0.25s ease;
+}
+
+.like-recipe:hover,
+.like-recipe.liked {
+  color: var(--white);
+  background-color: var(--primary-green);
+  transform: scale(1.08);
+}
+
 .save-recipe:hover {
   color: var(--white);
   background-color: var(--accent-orange);
@@ -230,6 +276,7 @@
   color: var(--dark-green);
   font-family: "Fraunces", serif;
   font-size: 1.45rem;
+  line-height: 1.2;
   font-weight: 700;
 }
 
@@ -238,8 +285,9 @@
 .recipe-details {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 15px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   color: var(--text-gray);
   font-size: 0.9rem;
 }
@@ -252,6 +300,17 @@
 
 .recipe-details .bi-clock {
   color: var(--primary-green);
+}
+
+.recipe-details .bi-hand-thumbs-up,
+.recipe-details .bi-hand-thumbs-up-fill {
+  color: var(--primary-green);
+}
+
+@media (max-width: 576px) {
+  .recipe-details .metric-label {
+    display: none;
+  }
 }
 
 .recipe-details .bi-star-fill {

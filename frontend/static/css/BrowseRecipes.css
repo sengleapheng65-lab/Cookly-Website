@@ -48,6 +48,48 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   box-shadow: var(--shadow);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.browse-search-form:focus-within {
+  border-color: rgba(31, 92, 66, 0.45);
+  box-shadow: 0 12px 30px rgba(31, 92, 66, 0.14);
+}
+
+.browse-filter-form {
+  width: min(920px, 100%);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin: 16px auto 0;
+}
+
+.browse-filter-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-gray);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.browse-filter-form select,
+.browse-filter-form button {
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text-dark);
+  font: inherit;
+}
+
+.browse-filter-form button {
+  color: var(--white);
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .browse-search-form > i {
@@ -217,6 +259,19 @@
     border-radius: 14px;
   }
 
+  .browse-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 14px;
+  }
+
+  .browse-filter-form button {
+    grid-column: 1 / -1;
+  }
+
+  .browse-search-form > i {
+    margin-left: 8px;
+  }
+
   .browse-search-form input {
     width: calc(100% - 40px);
     padding: 12px 4px;
@@ -293,6 +348,17 @@
     height: 38px;
   }
 
+  .recipe-card-actions {
+    top: 11px;
+    right: 11px;
+  }
+
+  .recipe-card-actions .save-recipe,
+  .recipe-card-actions .like-recipe {
+    width: 38px;
+    height: 38px;
+  }
+
   .recipe-card-content {
     padding: 18px;
   }
@@ -308,6 +374,10 @@
     flex-direction: column;
     gap: 6px;
     font-size: 0.84rem;
+  }
+
+  .recipe-details .metric-label {
+    display: none;
   }
 }
 

@@ -140,6 +140,43 @@
 
             <button type="submit">Search</button>
           </form>
+
+          <form class="browse-filter-form" method="GET" action="{{ url_for('browse') }}">
+            <input type="hidden" name="q" value="{{ search_term }}" />
+            <label>Category
+              <select name="category">
+                <option value="">Any category</option>
+                {% for value in ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Soup', 'Snack', 'Salad', 'Drink'] %}
+                <option value="{{ value }}" {% if filters.category == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>Difficulty
+              <select name="difficulty">
+                <option value="">Any difficulty</option>
+                {% for value in ['Easy', 'Medium', 'Hard'] %}
+                <option value="{{ value }}" {% if filters.difficulty == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>Cuisine
+              <select name="cuisine">
+                <option value="">Any cuisine</option>
+                {% for value in ['Italian', 'Mexican', 'American', 'Chinese', 'Korean', 'Thai', 'Indian', 'Middle Eastern', 'Caribbean'] %}
+                <option value="{{ value }}" {% if filters.cuisine == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>Diet
+              <select name="diet">
+                <option value="">Any diet</option>
+                {% for value in ['None', 'Vegetarian', 'Vegan', 'Gluten Free', 'Dairy Free', 'Nut Free', 'Keto', 'Pescatarian', 'Halal', 'Low Carb'] %}
+                <option value="{{ value }}" {% if filters.diet == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <button type="submit">Apply filters</button>
+          </form>
         </div>
       </section>
 
@@ -189,7 +226,7 @@
           <!-- Recipe card grid -->
           <div class="recipe-grid">
             {% for recipe in recipes %}
-            <article class="recipe-card" data-category="{{ recipe.category_name|lower }}">
+            <article class="recipe-card" id="recipe-card-{{ recipe.id }}" data-category="{{ recipe.category_name|lower }}">
               <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
                 <div
                   class="recipe-image recipe-image-bowl"
@@ -210,15 +247,20 @@
                     </span>
 
                     <span>{{ recipe.difficulty }}</span>
+                    <span class="like-count" title="Likes" aria-label="{{ recipe.like_count }} likes"><i class="bi bi-hand-thumbs-up" aria-hidden="true"></i> <span class="like-count-value">{{ recipe.like_count }}</span> <span class="metric-label">likes</span></span>
+                    <span title="Comments" aria-label="{{ recipe.comment_count }} comments"><i class="bi bi-chat" aria-hidden="true"></i> {{ recipe.comment_count }} <span class="metric-label">comments</span></span>
                   </div>
                 </div>
               </a>
               {% if session.get('user_id') %}
-              <form method="POST" action="{{ url_for('unsave_recipe' if recipe.is_saved else 'save_recipe', recipe_id=recipe.id) }}">
-                <button class="save-recipe{% if recipe.is_saved %} saved{% endif %}" type="submit" aria-label="{{ 'Remove from favorites' if recipe.is_saved else 'Add to favorites' }}">
-                  <i class="bi bi-heart{% if recipe.is_saved %}-fill{% endif %}" aria-hidden="true"></i>
-                </button>
-              </form>
+              <div class="recipe-card-actions">
+                <form class="like-form" method="POST" action="{{ url_for('unlike_recipe' if recipe.is_liked else 'like_recipe', recipe_id=recipe.id) }}" data-liked="{{ 'true' if recipe.is_liked else 'false' }}">
+                  <button class="like-recipe{% if recipe.is_liked %} liked{% endif %}" type="submit" aria-pressed="{{ 'true' if recipe.is_liked else 'false' }}" aria-label="{{ 'Unlike recipe' if recipe.is_liked else 'Like recipe' }}"><i class="bi bi-hand-thumbs-up{% if recipe.is_liked %}-fill{% endif %}" aria-hidden="true"></i></button>
+                </form>
+                <form class="save-form" method="POST" action="{{ url_for('unsave_recipe' if recipe.is_saved else 'save_recipe', recipe_id=recipe.id) }}" data-saved="{{ 'true' if recipe.is_saved else 'false' }}">
+                  <button class="save-recipe{% if recipe.is_saved %} saved{% endif %}" type="submit" aria-pressed="{{ 'true' if recipe.is_saved else 'false' }}" aria-label="{{ 'Remove from favorites' if recipe.is_saved else 'Add to favorites' }}"><i class="bi bi-heart{% if recipe.is_saved %}-fill{% endif %}" aria-hidden="true"></i></button>
+                </form>
+              </div>
               {% endif %}
             </article>
             {% endfor %}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ user.full_name }} - Cookly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navbar.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Footer.css') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet" />
+    <script src="{{ url_for('static', filename='js/navbar.js') }}" defer></script>
+    <style>
+      .public-profile { width: min(1080px, calc(100% - 32px)); margin: 48px auto 80px; }
+      .public-header { display: flex; align-items: center; gap: 20px; padding: 28px; margin-bottom: 34px; background: #fff; border: 1px solid #e7dfd3; border-radius: 22px; box-shadow: 0 14px 30px rgba(38, 52, 45, .08); }
+      .public-avatar { width: 78px; height: 78px; display: grid; place-items: center; flex: 0 0 78px; overflow: hidden; color: #fff; background: #1f5c42; border-radius: 50%; font-size: 2rem; font-weight: 700; }
+      .public-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .public-header h1, .public-profile h2 { margin: 0; color: #174f3a; font-family: "Fraunces", serif; }
+      .public-header p { margin: 5px 0 0; color: #6f7b74; }
+      .public-profile h2 { margin-bottom: 18px; font-size: 2rem; }
+      .public-recipes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+      .public-recipe { padding: 20px; color: #26342d; background: #fff; border: 1px solid #e7dfd3; border-radius: 16px; box-shadow: 0 8px 20px rgba(38, 52, 45, .06); }
+      .public-recipe h3 { margin: 0 0 8px; color: #174f3a; font-family: "Fraunces", serif; font-size: 1.3rem; }
+      .public-recipe p { margin: 0; color: #6f7b74; font-size: .9rem; }
+      .public-empty { padding: 28px; color: #6f7b74; background: #fff; border: 1px solid #e7dfd3; border-radius: 16px; }
+      @media (max-width: 560px) { .public-profile { margin-top: 28px; } .public-header { align-items: flex-start; padding: 20px; } .public-avatar { width: 58px; height: 58px; flex-basis: 58px; font-size: 1.4rem; } .public-header h1 { font-size: 1.55rem; } }
+    </style>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <main class="public-profile">
+      <section class="public-header">
+        <div class="public-avatar">
+          {% if user.profile_image_filename %}
+          <img src="{{ url_for('static', filename='uploads/' ~ user.profile_image_filename) }}" alt="{{ user.full_name }}" />
+          {% else %}
+          {{ user.full_name[:1] | upper }}
+          {% endif %}
+        </div>
+        <div>
+          <h1>{{ user.full_name }}</h1>
+          <p>Cookly community member</p>
+        </div>
+      </section>
+      <h2>Shared recipes</h2>
+      <section class="public-recipes">
+        {% for recipe in recipes %}
+        <a class="public-recipe" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
+          <h3>{{ recipe.title }}</h3>
+          <p>{{ recipe.category_name or 'Recipe' }} · {{ recipe.difficulty }} · {{ recipe.cooking_time_minutes }} minutes</p>
+        </a>
+        {% else %}
+        <p class="public-empty">This cook hasn’t shared any recipes yet.</p>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>

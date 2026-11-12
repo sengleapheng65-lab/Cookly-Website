@@ -30,6 +30,11 @@
       <li class="item">
         <a href="{{ url_for('profile') }}" class="nav_link {% if request.endpoint == 'profile' %}active{% endif %}">My Profile</a>
       </li>
+      {% if session.get('user_role') == 'moderator' %}
+      <li class="item">
+        <a href="{{ url_for('moderation_comments') }}" class="nav_link {% if request.endpoint == 'moderation_comments' %}active{% endif %}">Moderation</a>
+      </li>
+      {% endif %}
       <li class="item">
         <a href="{{ url_for('logout') }}" class="nav_button">Log Out</a>
       </li>

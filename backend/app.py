@@ -3,7 +3,7 @@ import os
 import uuid
 import mysql.connector
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from db import get_db_connection
@@ -35,8 +35,13 @@ def home():
             """
             SELECT r.id, r.title, r.cooking_time_minutes, r.image_filename,
                    r.created_at, c.name AS category_name,
-                   COUNT(weekly_saves.recipe_id) AS weekly_saves,
-                   CASE WHEN user_saves.recipe_id IS NULL THEN 0 ELSE 1 END AS is_saved
+                   COUNT(DISTINCT weekly_saves.user_id) AS weekly_saves,
+                   COUNT(DISTINCT recipe_likes.user_id) AS like_count,
+                   (SELECT COUNT(*) FROM comments all_comments
+                    WHERE all_comments.recipe_id = r.id
+                      AND all_comments.is_hidden = FALSE) AS comment_count,
+                   CASE WHEN user_saves.recipe_id IS NULL THEN 0 ELSE 1 END AS is_saved,
+                   CASE WHEN user_likes.recipe_id IS NULL THEN 0 ELSE 1 END AS is_liked
             FROM recipes r
             LEFT JOIN categories c ON r.catergory_id = c.id
             LEFT JOIN saved_recipes weekly_saves
@@ -45,12 +50,17 @@ def home():
             LEFT JOIN saved_recipes user_saves
               ON user_saves.recipe_id = r.id
              AND user_saves.user_id = %s
+            LEFT JOIN recipe_likes recipe_likes
+              ON recipe_likes.recipe_id = r.id
+            LEFT JOIN recipe_likes user_likes
+              ON user_likes.recipe_id = r.id
+             AND user_likes.user_id = %s
             GROUP BY r.id, r.title, r.cooking_time_minutes, r.image_filename,
-                     r.created_at, c.name, user_saves.recipe_id
+                     r.created_at, c.name, user_saves.recipe_id, user_likes.recipe_id
             ORDER BY weekly_saves DESC, r.created_at DESC
             LIMIT 3
             """,
-            (current_user_id,),
+            (current_user_id, current_user_id),
         )
         popular_recipes = cursor.fetchall()
         cursor.close()
@@ -76,9 +86,14 @@ def login():
         cursor.close()
         conn.close()
 
+        if user and user.get('is_suspended'):
+            flash('This account has been suspended.', 'error')
+            return redirect(url_for('login'))
+
         if user and check_password_hash(user['password_hash'], password):
             session['user_id'] = user['id']
             session['user_name'] = user['full_name']
+            session['user_role'] = user.get('role', 'registered')
             # Redirect straight to Profile Page after login
             return redirect(url_for('profile'))
 
@@ -340,15 +355,25 @@ def delete_recipe(recipe_id):
         return redirect(url_for('login'))
 
     recipe, conn = get_recipe_for_user(recipe_id)
+    if not recipe and session.get('user_role') == 'moderator':
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute('SELECT * FROM recipes WHERE id = %s', (recipe_id,))
+            recipe = cursor.fetchone()
+            cursor.close()
     if not recipe or not conn:
         flash('Recipe not found.', 'error')
         return redirect(url_for('profile'))
 
     cursor = conn.cursor()
-    cursor.execute(
-        "DELETE FROM recipes WHERE id = %s AND user_id = %s",
-        (recipe_id, session['user_id']),
-    )
+    if session.get('user_role') == 'moderator':
+        cursor.execute("DELETE FROM recipes WHERE id = %s", (recipe_id,))
+    else:
+        cursor.execute(
+            "DELETE FROM recipes WHERE id = %s AND user_id = %s",
+            (recipe_id, session['user_id']),
+        )
     conn.commit()
     cursor.close()
     conn.close()
@@ -384,7 +409,8 @@ def save_recipe(recipe_id):
         cursor.close()
         conn.close()
 
-    return redirect(request.referrer or url_for('browse'))
+    destination = request.referrer or url_for('browse')
+    return redirect(destination.split('#', 1)[0] + f'#recipe-card-{recipe_id}')
 
 
 @app.post('/recipes/<int:recipe_id>/unsave')
@@ -403,19 +429,71 @@ def unsave_recipe(recipe_id):
         cursor.close()
         conn.close()
 
-    return redirect(request.referrer or url_for('browse'))
+    destination = request.referrer or url_for('browse')
+    return redirect(destination.split('#', 1)[0] + f'#recipe-card-{recipe_id}')
+
+
+@app.post('/recipes/<int:recipe_id>/like')
+def like_recipe(recipe_id):
+    if 'user_id' not in session:
+        flash('Please sign in to like recipes.', 'error')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(request.referrer or url_for('browse'))
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'INSERT IGNORE INTO recipe_likes (user_id, recipe_id) VALUES (%s, %s)',
+            (session['user_id'], recipe_id),
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
+    destination = request.referrer or url_for('browse')
+    return redirect(destination.split('#', 1)[0] + f'#recipe-card-{recipe_id}')
+
+
+@app.post('/recipes/<int:recipe_id>/unlike')
+def unlike_recipe(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'DELETE FROM recipe_likes WHERE user_id = %s AND recipe_id = %s',
+            (session['user_id'], recipe_id),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    destination = request.referrer or url_for('browse')
+    return redirect(destination.split('#', 1)[0] + f'#recipe-card-{recipe_id}')
 
 
 @app.route('/browse')
 def browse():
     conn = get_db_connection()
     recipes = []
+    search_term = request.args.get('q', '').strip()
+    category_filter = request.args.get('category', '').strip()
+    difficulty_filter = request.args.get('difficulty', '').strip()
+    cuisine_filter = request.args.get('cuisine', '').strip()
+    diet_filter = request.args.get('diet', '').strip()
 
     if conn:
         cursor = conn.cursor(dictionary=True)
         current_user_id = session.get('user_id', 0)
-        search_term = request.args.get('q', '').strip()
         search_clause = ''
+        filter_clause = ''
         query_params = [current_user_id]
 
         if search_term:
@@ -429,21 +507,43 @@ def browse():
             search_value = f'%{search_term}%'
             query_params.extend([search_value] * 6)
 
+        if category_filter:
+            filter_clause += ' AND c.name = %s'
+            query_params.append(category_filter)
+        if difficulty_filter in {'Easy', 'Medium', 'Hard'}:
+            filter_clause += ' AND r.difficulty = %s'
+            query_params.append(difficulty_filter)
+        if cuisine_filter:
+            filter_clause += ' AND cu.name = %s'
+            query_params.append(cuisine_filter)
+        if diet_filter:
+            filter_clause += ' AND d.name = %s'
+            query_params.append(diet_filter)
+
         cursor.execute(
             f"""
             SELECT r.*, c.name AS category_name, cu.name AS cuisine_name,
-                   d.name AS diet_name, s.recipe_id IS NOT NULL AS is_saved
+                   d.name AS diet_name, s.recipe_id IS NOT NULL AS is_saved,
+                   l.recipe_id IS NOT NULL AS is_liked,
+                   (SELECT COUNT(*) FROM recipe_likes all_likes
+                    WHERE all_likes.recipe_id = r.id) AS like_count,
+                   (SELECT COUNT(*) FROM comments all_comments
+                    WHERE all_comments.recipe_id = r.id
+                      AND all_comments.is_hidden = FALSE) AS comment_count
             FROM recipes r
             LEFT JOIN categories c ON r.catergory_id = c.id
             LEFT JOIN cuisines cu ON r.cuisine_id = cu.id
             LEFT JOIN diet_types d ON r.diet_type_id = d.id
             LEFT JOIN saved_recipes s
               ON s.recipe_id = r.id AND s.user_id = %s
+            LEFT JOIN recipe_likes l
+              ON l.recipe_id = r.id AND l.user_id = %s
             WHERE 1=1
             {search_clause}
+            {filter_clause}
             ORDER BY r.created_at DESC
             """,
-            query_params,
+            [current_user_id, current_user_id] + query_params[1:],
         )
         recipes = cursor.fetchall()
         cursor.close()
@@ -453,6 +553,12 @@ def browse():
         'browse.html',
         recipes=recipes,
         search_term=request.args.get('q', '').strip(),
+        filters={
+            'category': category_filter,
+            'difficulty': difficulty_filter,
+            'cuisine': cuisine_filter,
+            'diet': diet_filter,
+        },
     )
 
 
@@ -467,7 +573,13 @@ def recipe_detail(recipe_id):
     cursor.execute(
         """
         SELECT r.*, u.full_name AS author_name, c.name AS category_name,
-               cu.name AS cuisine_name, d.name AS diet_name
+               cu.name AS cuisine_name, d.name AS diet_name,
+               (SELECT COUNT(*) FROM recipe_likes WHERE recipe_id = r.id) AS like_count,
+               EXISTS(
+                   SELECT 1 FROM recipe_likes
+                   WHERE recipe_likes.recipe_id = r.id
+                     AND recipe_likes.user_id = %s
+               ) AS is_liked
         FROM recipes r
         JOIN users u ON r.user_id = u.id
         LEFT JOIN categories c ON r.catergory_id = c.id
@@ -475,9 +587,29 @@ def recipe_detail(recipe_id):
         LEFT JOIN diet_types d ON r.diet_type_id = d.id
         WHERE r.id = %s
         """,
-        (recipe_id,),
+        (session.get('user_id', 0), recipe_id),
     )
     recipe = cursor.fetchone()
+    comments = []
+    if recipe:
+        try:
+            cursor.execute(
+                """
+                SELECT comments.id, comments.body, comments.created_at,
+                       comments.user_id, users.full_name AS author_name,
+                       users.profile_image_filename
+                FROM comments
+                JOIN users ON users.id = comments.user_id
+                WHERE comments.recipe_id = %s
+                  AND comments.is_hidden = FALSE
+                ORDER BY comments.created_at DESC
+                """,
+                (recipe_id,),
+            )
+            comments = cursor.fetchall()
+        except mysql.connector.Error:
+            # Keep recipe pages available before the comments migration runs.
+            comments = []
     cursor.close()
     conn.close()
 
@@ -485,7 +617,190 @@ def recipe_detail(recipe_id):
         flash('Recipe not found.', 'error')
         return redirect(url_for('browse'))
 
-    return render_template('recipe-detail.html', recipe=recipe)
+    return render_template('recipe-detail.html', recipe=recipe, comments=comments)
+
+
+@app.route('/users/<int:user_id>')
+def public_profile(user_id):
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('browse'))
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        'SELECT id, full_name, profile_image_filename, created_at FROM users WHERE id = %s AND is_suspended = FALSE',
+        (user_id,),
+    )
+    user = cursor.fetchone()
+    recipes = []
+    if user:
+        cursor.execute(
+            """
+            SELECT r.*, c.name AS category_name
+            FROM recipes r
+            LEFT JOIN categories c ON r.catergory_id = c.id
+            WHERE r.user_id = %s
+            ORDER BY r.created_at DESC
+            """,
+            (user_id,),
+        )
+        recipes = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if not user:
+        flash('Profile not found.', 'error')
+        return redirect(url_for('browse'))
+
+    return render_template('public-profile.html', user=user, recipes=recipes)
+
+
+@app.post('/recipes/<int:recipe_id>/comments')
+def add_comment(recipe_id):
+    if 'user_id' not in session:
+        flash('Please sign in to comment on recipes.', 'error')
+        return redirect(url_for('login'))
+
+    body = request.form.get('body', '').strip()
+    if not body:
+        flash('Please write a comment before submitting.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+    if len(body) > 1000:
+        flash('Comments must be 1000 characters or fewer.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'INSERT INTO comments (user_id, recipe_id, body) VALUES (%s, %s, %s)',
+            (session['user_id'], recipe_id, body),
+        )
+        conn.commit()
+        comment_id = cursor.lastrowid
+        flash('Comment added.', 'success')
+    except mysql.connector.Error:
+        conn.rollback()
+        flash('Unable to add your comment.', 'error')
+    finally:
+        cursor.close()
+        conn.close()
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'id': comment_id,
+            'body': body,
+            'author_name': session.get('user_name', 'You'),
+            'user_id': session['user_id'],
+        })
+
+    return redirect(url_for('recipe_detail', recipe_id=recipe_id) + '#comments')
+
+
+@app.post('/comments/<int:comment_id>/delete')
+def delete_comment(comment_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(request.referrer or url_for('browse'))
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        'SELECT recipe_id, user_id FROM comments WHERE id = %s',
+        (comment_id,),
+    )
+    comment = cursor.fetchone()
+    can_moderate = session.get('user_role') == 'moderator'
+    if not comment or (comment['user_id'] != session['user_id'] and not can_moderate):
+        cursor.close()
+        conn.close()
+        flash('You do not have permission to remove this comment.', 'error')
+        return redirect(request.referrer or url_for('browse'))
+
+    cursor.execute('DELETE FROM comments WHERE id = %s', (comment_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    flash('Comment removed.', 'success')
+    return redirect(url_for('recipe_detail', recipe_id=comment['recipe_id']) + '#comments')
+
+
+@app.post('/comments/<int:comment_id>/hide')
+def hide_comment(comment_id):
+    if 'user_id' not in session or session.get('user_role') != 'moderator':
+        flash('Only moderators can hide comments.', 'error')
+        return redirect(request.referrer or url_for('browse'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(request.referrer or url_for('browse'))
+
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT recipe_id FROM comments WHERE id = %s', (comment_id,))
+    comment = cursor.fetchone()
+    if comment:
+        cursor.execute('UPDATE comments SET is_hidden = TRUE WHERE id = %s', (comment_id,))
+        conn.commit()
+        flash('Comment hidden from public view.', 'success')
+    else:
+        flash('Comment not found.', 'error')
+    cursor.close()
+    conn.close()
+    return redirect(url_for('recipe_detail', recipe_id=comment['recipe_id']) + '#comments' if comment else (request.referrer or url_for('browse')))
+
+
+@app.route('/moderation/comments')
+def moderation_comments():
+    if 'user_id' not in session or session.get('user_role') != 'moderator':
+        flash('Only moderators can access moderation tools.', 'error')
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    hidden_comments = []
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            """
+            SELECT comments.id, comments.body, comments.created_at,
+                   users.full_name AS author_name, recipes.id AS recipe_id,
+                   recipes.title AS recipe_title
+            FROM comments
+            JOIN users ON users.id = comments.user_id
+            JOIN recipes ON recipes.id = comments.recipe_id
+            WHERE comments.is_hidden = TRUE
+            ORDER BY comments.created_at DESC
+            """
+        )
+        hidden_comments = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    return render_template('moderation-comments.html', comments=hidden_comments)
+
+
+@app.post('/comments/<int:comment_id>/unhide')
+def unhide_comment(comment_id):
+    if 'user_id' not in session or session.get('user_role') != 'moderator':
+        flash('Only moderators can unhide comments.', 'error')
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE comments SET is_hidden = FALSE WHERE id = %s', (comment_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    flash('Comment restored to public view.', 'success')
+    return redirect(url_for('moderation_comments'))
 
 
 @app.route('/collections')
@@ -698,4 +1013,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=int(os.getenv('PORT', '5050')))
