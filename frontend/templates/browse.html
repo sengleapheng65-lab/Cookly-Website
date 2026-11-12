@@ -175,6 +175,14 @@
                 {% endfor %}
               </select>
             </label>
+            <label>Exclude allergy
+              <select name="allergy">
+                <option value="">No exclusion</option>
+                {% for value in allergy_names %}
+                <option value="{{ value }}" {% if filters.allergy == value %}selected{% endif %}>{{ value }}</option>
+                {% endfor %}
+              </select>
+            </label>
             <button type="submit">Apply filters</button>
           </form>
         </div>

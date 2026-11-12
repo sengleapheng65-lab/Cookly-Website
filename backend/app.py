@@ -23,6 +23,25 @@ UPLOAD_DIR = os.path.join(STATIC_DIR, 'uploads')
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 
+def singular_word(word):
+    return word[:-1] if word.endswith("s") else word
+
+
+def link_ingredient_to_allergies(cursor, ingredient_id, ingredient_name):
+    cursor.execute("SELECT id, name FROM allergies")
+    ingredient_words = {singular_word(word) for word in ingredient_name.lower().split()}
+    for allergy in cursor.fetchall():
+        allergy_words = [singular_word(word) for word in allergy["name"].lower().split()]
+        if allergy_words and all(word in ingredient_words for word in allergy_words):
+            cursor.execute(
+                """
+                INSERT IGNORE INTO ingredient_allergies (ingredient_id, allergy_id)
+                VALUES (%s, %s)
+                """,
+                (ingredient_id, allergy["id"]),
+            )
+
+
 @app.route('/')
 def home():
     conn = get_db_connection()
@@ -226,6 +245,38 @@ def add_recipe():
                 cooking_time, servings, ingredients, instructions, image_filename,
             ),
         )
+        recipe_id = cursor.lastrowid
+
+        ingredient_lines = [line.strip() for line in ingredients.splitlines() if line.strip()]
+        for line in ingredient_lines:
+            cursor.execute(
+                """
+                INSERT INTO ingredients (name)
+                VALUES (%s)
+                ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
+                """,
+                (line,),
+            )
+            ingredient_id = cursor.lastrowid
+            cursor.execute(
+                """
+                INSERT INTO recipe_ingredients (recipe_id, ingredient_id)
+                VALUES (%s, %s)
+                """,
+                (recipe_id, ingredient_id),
+            )
+            link_ingredient_to_allergies(cursor, ingredient_id, line)
+
+        instruction_lines = [line.strip() for line in instructions.splitlines() if line.strip()]
+        for step_number, line in enumerate(instruction_lines, start=1):
+            cursor.execute(
+                """
+                INSERT INTO instructions (recipe_id, step_number, instruction_text)
+                VALUES (%s, %s, %s)
+                """,
+                (recipe_id, step_number, line),
+            )
+
         conn.commit()
     except mysql.connector.Error as error:
         conn.rollback()
@@ -488,9 +539,13 @@ def browse():
     difficulty_filter = request.args.get('difficulty', '').strip()
     cuisine_filter = request.args.get('cuisine', '').strip()
     diet_filter = request.args.get('diet', '').strip()
+    allergy_filter = request.args.get('allergy', '').strip()
+    allergy_names = []
 
     if conn:
         cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name FROM allergies ORDER BY name")
+        allergy_names = [row["name"] for row in cursor.fetchall()]
         current_user_id = session.get('user_id', 0)
         search_clause = ''
         filter_clause = ''
@@ -501,11 +556,16 @@ def browse():
                 AND (
                     r.title LIKE %s OR r.description LIKE %s OR
                     r.ingredients LIKE %s OR c.name LIKE %s OR
-                    cu.name LIKE %s OR d.name LIKE %s
+                    cu.name LIKE %s OR d.name LIKE %s OR
+                    EXISTS (
+                        SELECT 1 FROM recipe_ingredients found_ri
+                        JOIN ingredients found_ing ON found_ing.id = found_ri.ingredient_id
+                        WHERE found_ri.recipe_id = r.id AND found_ing.name LIKE %s
+                    )
                 )
             """
             search_value = f'%{search_term}%'
-            query_params.extend([search_value] * 6)
+            query_params.extend([search_value] * 7)
 
         if category_filter:
             filter_clause += ' AND c.name = %s'
@@ -519,6 +579,17 @@ def browse():
         if diet_filter:
             filter_clause += ' AND d.name = %s'
             query_params.append(diet_filter)
+        if allergy_filter:
+            filter_clause += """
+                AND NOT EXISTS (
+                    SELECT 1 FROM recipe_ingredients blocked_ri
+                    JOIN ingredient_allergies blocked_ia
+                      ON blocked_ia.ingredient_id = blocked_ri.ingredient_id
+                    JOIN allergies blocked_a ON blocked_a.id = blocked_ia.allergy_id
+                    WHERE blocked_ri.recipe_id = r.id AND blocked_a.name = %s
+                )
+            """
+            query_params.append(allergy_filter)
 
         cursor.execute(
             f"""
@@ -558,7 +629,9 @@ def browse():
             'difficulty': difficulty_filter,
             'cuisine': cuisine_filter,
             'diet': diet_filter,
+            'allergy': allergy_filter,
         },
+        allergy_names=allergy_names,
     )
 
 
