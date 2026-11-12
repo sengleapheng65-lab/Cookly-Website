@@ -32,6 +32,15 @@
 
   <body class="login-page">
     <main class="login-main">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="server-flashes" role="status">
+          {% for category, message in messages %}
+          <p class="server-flash {{ category }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
       <section class="auth-card" id="authCard">
         <!-- ==================== SIGN IN FORM ==================== -->
         <div class="form-container sign-in-container">

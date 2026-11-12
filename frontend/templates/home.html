@@ -47,7 +47,7 @@
     <header class="navbar">
       <nav class="navbar_container">
         <!-- Cookly logo -->
-        <a class="cookly_brand" href="#">
+        <a class="cookly_brand" href="{{ url_for('home') }}">
           <span id="nav_logo" aria-hidden="true">
             <span class="logo_egg"></span>
           </span>
@@ -62,27 +62,33 @@
           </li>
 
           <li class="item">
-            <a class="nav_link" href="browse.html">Browse Recipes</a>
+            <a class="nav_link" href="{{ url_for('browse') }}">Browse Recipes</a>
           </li>
 
           <li class="item">
-            <a class="nav_link" href="add-recipe.html">Add Recipe</a>
+            <a class="nav_link" href="{{ url_for('add_recipe') }}">Add Recipe</a>
           </li>
 
+          {% if session.get('user_id') %}
           <li class="item">
-            <a class="nav_link" href="collections.html">My Collections</a>
+            <a class="nav_link" href="{{ url_for('collections') }}">Collections</a>
           </li>
-
           <li class="item">
-            <a class="nav_link" href="login.html">Login</a>
+            <a class="nav_link" href="{{ url_for('profile') }}">My Profile</a>
           </li>
-
           <li class="item">
-            <a class="nav_button" href="login.html#register">
-              Register
-              <i class="bi bi-arrow-up-right"></i>
+            <a class="nav_button" href="{{ url_for('logout') }}">Log Out</a>
+          </li>
+          {% else %}
+          <li class="item">
+            <a class="nav_link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          <li class="item">
+            <a class="nav_button" href="{{ url_for('login') }}#register">
+              Register <i class="bi bi-arrow-up-right"></i>
             </a>
           </li>
+          {% endif %}
         </ul>
 
         <!-- Hamburger button -->
@@ -120,11 +126,12 @@
             </p>
 
             <!-- Search form -->
-            <form class="recipe-search" id="recipeSearch">
+            <form class="recipe-search" id="recipeSearch" action="{{ url_for('browse') }}" method="GET" data-server-search="true">
               <i class="bi bi-search search-icon" aria-hidden="true"></i>
 
               <input
                 type="search"
+                name="q"
                 id="searchInput"
                 placeholder="Search recipes, cuisine, or ingredients..."
                 aria-label="Search recipes"
@@ -206,7 +213,7 @@
             </div>
 
             <!-- Link to all recipes -->
-            <a class="view-all-link" id="viewAllRecipes" href="browse.html">
+            <a class="view-all-link" id="viewAllRecipes" href="{{ url_for('browse') }}">
               View all recipes
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
@@ -214,107 +221,45 @@
 
           <!-- Recipe card grid -->
           <div class="recipe-grid">
-            <!-- Recipe card 1 -->
-            <article class="recipe-card" data-category="pasta">
-              <div class="recipe-image recipe-image-pasta">
-                <!-- Recipe category -->
-                <span class="recipe-category">Pasta</span>
-
-                <!-- Save recipe button -->
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
+            {% for recipe in popular_recipes %}
+            <article class="recipe-card" id="recipe-card-{{ recipe.id }}">
+              <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
+                <div
+                  class="recipe-image"
+                  {% if recipe.image_filename %}
+                  style="background-image: url('{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}');"
+                  {% endif %}
                 >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <!-- Recipe information -->
-              <div class="recipe-card-content">
-                <h3>Creamy Tomato Pasta</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    25 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.9
-                  </span>
+                  <span class="recipe-category">{{ recipe.category_name }}</span>
                 </div>
-              </div>
-            </article>
 
-            <!-- Recipe card 2 -->
-            <article class="recipe-card" data-category="healthy">
-              <div class="recipe-image recipe-image-bowl">
-                <!-- Recipe category -->
-                <span class="recipe-category">Healthy</span>
-
-                <!-- Save recipe button -->
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <!-- Recipe information -->
-              <div class="recipe-card-content">
-                <h3>Fresh Avocado Bowl</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    15 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.8
-                  </span>
+                <div class="recipe-card-content">
+                  <h3>{{ recipe.title }}</h3>
+                  <div class="recipe-details">
+                    <span>
+                      <i class="bi bi-clock" aria-hidden="true"></i>
+                      {{ recipe.cooking_time_minutes }} minutes
+                    </span>
+                    <span class="like-count" title="Likes" aria-label="{{ recipe.like_count }} likes"><i class="bi bi-hand-thumbs-up" aria-hidden="true"></i> <span class="like-count-value">{{ recipe.like_count }}</span> <span class="metric-label">likes</span></span>
+                    <span title="Comments" aria-label="{{ recipe.comment_count }} comments"><i class="bi bi-chat" aria-hidden="true"></i> {{ recipe.comment_count }} <span class="metric-label">comments</span></span>
+                  </div>
                 </div>
+              </a>
+
+              {% if session.get('user_id') %}
+              <div class="recipe-card-actions">
+                <form class="like-form" method="POST" action="{{ url_for('unlike_recipe' if recipe.is_liked else 'like_recipe', recipe_id=recipe.id) }}" data-liked="{{ 'true' if recipe.is_liked else 'false' }}">
+                  <button class="like-recipe{% if recipe.is_liked %} liked{% endif %}" type="submit" aria-pressed="{{ 'true' if recipe.is_liked else 'false' }}" aria-label="{{ 'Unlike recipe' if recipe.is_liked else 'Like recipe' }}"><i class="bi bi-hand-thumbs-up{% if recipe.is_liked %}-fill{% endif %}" aria-hidden="true"></i></button>
+                </form>
+                <form class="save-form" method="POST" action="{{ url_for('unsave_recipe' if recipe.is_saved else 'save_recipe', recipe_id=recipe.id) }}" data-saved="{{ 'true' if recipe.is_saved else 'false' }}">
+                  <button class="save-recipe{% if recipe.is_saved %} saved{% endif %}" type="submit" aria-pressed="{{ 'true' if recipe.is_saved else 'false' }}" aria-label="{{ 'Remove from favorites' if recipe.is_saved else 'Add to favorites' }}"><i class="bi bi-heart{% if recipe.is_saved %}-fill{% endif %}" aria-hidden="true"></i></button>
+                </form>
               </div>
+              {% endif %}
             </article>
-
-            <!-- Recipe card 3 -->
-            <article class="recipe-card" data-category="dinner">
-              <div class="recipe-image recipe-image-chicken">
-                <!-- Recipe category -->
-                <span class="recipe-category">Dinner</span>
-
-                <!-- Save recipe button -->
-                <button
-                  class="save-recipe"
-                  type="button"
-                  aria-label="Save recipe"
-                >
-                  <i class="bi bi-heart" aria-hidden="true"></i>
-                </button>
-              </div>
-
-              <!-- Recipe information -->
-              <div class="recipe-card-content">
-                <h3>Herb Roasted Chicken</h3>
-
-                <div class="recipe-details">
-                  <span>
-                    <i class="bi bi-clock" aria-hidden="true"></i>
-                    45 minutes
-                  </span>
-
-                  <span>
-                    <i class="bi bi-star-fill" aria-hidden="true"></i>
-                    4.9
-                  </span>
-                </div>
-              </div>
-            </article>
+            {% else %}
+            <p class="browse-empty-message">No recipes have been added yet.</p>
+            {% endfor %}
           </div>
         </div>
       </section>

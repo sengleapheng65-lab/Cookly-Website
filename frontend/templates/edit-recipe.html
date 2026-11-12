@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit {{ recipe.title }} - Cookly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navbar.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AddRecipe.css') }}" />
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <main class="add-recipe-section">
+      <div class="page-container">
+        <div class="add-recipe-heading">
+          <p class="section-label">Manage your recipe</p>
+          <h1>Edit your recipe</h1>
+        </div>
+        <form class="add-recipe-form" method="POST" enctype="multipart/form-data">
+          <div class="form-section">
+            <h2>Recipe details</h2>
+            <div class="form-grid">
+              <div class="form-group form-group-full">
+                <label for="recipeTitle">Recipe title</label>
+                <input id="recipeTitle" name="recipeTitle" value="{{ recipe.title }}" required />
+              </div>
+              <div class="form-group">
+                <label for="recipeDifficulty">Difficulty</label>
+                <select id="recipeDifficulty" name="recipeDifficulty" required>
+                  {% for level in ['Easy', 'Medium', 'Hard'] %}
+                  <option value="{{ level }}" {% if recipe.difficulty == level %}selected{% endif %}>{{ level }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="recipeImage">Replace photo</label>
+                <input id="recipeImage" name="recipeImage" type="file" accept="image/*" />
+              </div>
+              <div class="form-group">
+                <label for="prepTime">Preparation time</label>
+                <input id="prepTime" name="prepTime" type="number" min="0" value="{{ recipe.prep_time_minutes }}" required />
+              </div>
+              <div class="form-group">
+                <label for="cookTime">Cooking time</label>
+                <input id="cookTime" name="cookTime" type="number" min="0" value="{{ recipe.cooking_time_minutes }}" required />
+              </div>
+              <div class="form-group">
+                <label for="servings">Servings</label>
+                <input id="servings" name="servings" type="number" min="1" value="{{ recipe.serving_size }}" required />
+              </div>
+              <div class="form-group form-group-full">
+                <label for="recipeDescription">Short description</label>
+                <textarea id="recipeDescription" name="recipeDescription" rows="4" required>{{ recipe.description }}</textarea>
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h2>Ingredients</h2>
+            <div class="form-group form-group-full">
+              <label for="ingredients">Ingredients</label>
+              <textarea id="ingredients" name="ingredients" rows="8" required>{{ recipe.ingredients }}</textarea>
+            </div>
+          </div>
+          <div class="form-section">
+            <h2>Instructions</h2>
+            <div class="form-group form-group-full">
+              <label for="instructions">Instructions</label>
+              <textarea id="instructions" name="instructions" rows="10" required>{{ recipe.instructions }}</textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="submit-recipe-button" type="submit">Save changes</button>
+            <a href="{{ url_for('profile') }}">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </main>
+  </body>
+</html>

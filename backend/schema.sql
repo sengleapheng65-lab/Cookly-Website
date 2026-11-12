@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('registered', 'moderator') NOT NULL DEFAULT 'registered',
+    is_suspended BOOLEAN NOT NULL DEFAULT FALSE,
+    profile_image_filename VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -68,21 +70,25 @@ CREATE TABLE IF NOT EXISTS source (
 CREATE TABLE IF NOT EXISTS recipes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    category_id INT NOT NULL,
+    catergory_id INT NOT NULL,
     cuisine_id INT NOT NULL,
     diet_type_id INT NOT NULL,
     source_id INT NULL,
-    original_recipe_id INT NULL, -- empty for normal recipes, filled when the recipe is a variation so it links back to orig
+    original_recipe_id INT NULL, -- empty for a normal recipe, filled when this recipe is a variation
     title VARCHAR(150) NOT NULL,
     description TEXT NOT NULL,
-    difficulty ENUM('Easy', 'Medium', 'Hard') NOT NULL, -- set levels it accepts
+    difficulty ENUM('Easy', 'Medium', 'Hard') NOT NULL,
+    prep_time_minutes INT NOT NULL,
     cooking_time_minutes INT NOT NULL,
     serving_size INT NOT NULL,
+    ingredients TEXT NOT NULL,
+    instructions TEXT NOT NULL,
+    image_filename VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, title),
     INDEX (title),
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (category_id) REFERENCES categories(id),
+    FOREIGN KEY (catergory_id) REFERENCES categories(id),
     FOREIGN KEY (cuisine_id) REFERENCES cuisines(id),
     FOREIGN KEY (diet_type_id) REFERENCES diet_types(id),
     FOREIGN KEY (source_id) REFERENCES source(id),
@@ -95,7 +101,7 @@ CREATE TABLE IF NOT EXISTS ingredients (
     description VARCHAR(255) NULL
 );
 
-CREATE TABLE IF NOT EXISTS recipe_ingredients ( -- says which recipe uses that ingredient and how much.
+CREATE TABLE IF NOT EXISTS recipe_ingredients ( -- says which recipe uses that ingredient and how much
     recipe_id INT NOT NULL,
     ingredient_id INT NOT NULL,
     amount VARCHAR(100) NULL,
@@ -118,7 +124,7 @@ CREATE TABLE IF NOT EXISTS allergies (
     name VARCHAR(50) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS ingredient_allergies(
+CREATE TABLE IF NOT EXISTS ingredient_allergies (
     ingredient_id INT NOT NULL,
     allergy_id INT NOT NULL,
     PRIMARY KEY (ingredient_id, allergy_id),
@@ -126,7 +132,7 @@ CREATE TABLE IF NOT EXISTS ingredient_allergies(
     FOREIGN KEY (allergy_id) REFERENCES allergies(id)
 );
 
-INSERT IGNORE INTO allergies(name) VALUES
+INSERT IGNORE INTO allergies (name) VALUES
 ('Peanuts'),
 ('Dairy'),
 ('Shellfish'),
@@ -145,7 +151,7 @@ CREATE TABLE IF NOT EXISTS collections (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS saved_recipes (
+CREATE TABLE IF NOT EXISTS collection_recipes (
     collection_id INT NOT NULL,
     recipe_id INT NOT NULL,
     saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -154,12 +160,32 @@ CREATE TABLE IF NOT EXISTS saved_recipes (
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS saved_recipes (
+    user_id INT NOT NULL,
+    recipe_id INT NOT NULL,
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     recipe_id INT NOT NULL,
-    comment_text TEXT NOT NULL,
+    body VARCHAR(1000) NOT NULL,
+    is_hidden BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
+    INDEX (recipe_id, created_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS recipe_likes (
+    user_id INT NOT NULL,
+    recipe_id INT NOT NULL,
+    liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, recipe_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );

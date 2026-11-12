@@ -59,31 +59,37 @@
         <!-- Navigation links -->
         <ul class="navbar_menu" id="navbarMenu">
           <li class="item">
-            <a class="nav_link" href="home.html">Home</a>
+            <a class="nav_link" href="{{ url_for('home') }}">Home</a>
           </li>
 
           <li class="item">
-            <a class="nav_link" href="browse.html">Browse Recipes</a>
+            <a class="nav_link" href="{{ url_for('browse') }}">Browse Recipes</a>
           </li>
 
           <li class="item">
-            <a class="nav_link active" href="add-recipe.html">Add Recipe</a>
+            <a class="nav_link active" href="{{ url_for('add_recipe') }}">Add Recipe</a>
           </li>
 
+          {% if session.get('user_id') %}
           <li class="item">
-            <a class="nav_link" href="collections.html">My Collections</a>
+            <a class="nav_link" href="{{ url_for('collections') }}">Collections</a>
           </li>
-
           <li class="item">
-            <a class="nav_link" href="login.html">Login</a>
+            <a class="nav_link" href="{{ url_for('profile') }}">My Profile</a>
           </li>
-
           <li class="item">
-            <a class="nav_button" href="home.html#register">
-              Register
-              <i class="bi bi-arrow-up-right"></i>
+            <a class="nav_button" href="{{ url_for('logout') }}">Log Out</a>
+          </li>
+          {% else %}
+          <li class="item">
+            <a class="nav_link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          <li class="item">
+            <a class="nav_button" href="{{ url_for('login') }}#register">
+              Register <i class="bi bi-arrow-up-right"></i>
             </a>
           </li>
+          {% endif %}
         </ul>
 
         <!-- Hamburger button -->
@@ -120,7 +126,13 @@
           </div>
 
           <!-- Recipe form -->
-          <form class="add-recipe-form" id="addRecipeForm">
+          <form
+            class="add-recipe-form"
+            id="addRecipeForm"
+            action="{{ url_for('add_recipe') }}"
+            method="POST"
+            enctype="multipart/form-data"
+          >
             <!-- Basic recipe information -->
             <div class="form-section">
               <h2>Recipe details</h2>
@@ -143,12 +155,47 @@
 
                   <select id="recipeCategory" name="recipeCategory" required>
                     <option value="">Choose a category</option>
-                    <option value="breakfast">Breakfast</option>
-                    <option value="lunch">Lunch</option>
-                    <option value="dinner">Dinner</option>
-                    <option value="dessert">Dessert</option>
-                    <option value="healthy">Healthy</option>
-                    <option value="vegan">Vegan</option>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Dessert">Dessert</option>
+                    <option value="Soup">Soup</option>
+                    <option value="Snack">Snack</option>
+                    <option value="Salad">Salad</option>
+                    <option value="Drink">Drink</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="recipeCuisine">Cuisine</label>
+                  <select id="recipeCuisine" name="recipeCuisine" required>
+                    <option value="">Choose a cuisine</option>
+                    <option value="Italian">Italian</option>
+                    <option value="Mexican">Mexican</option>
+                    <option value="American">American</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="Korean">Korean</option>
+                    <option value="Thai">Thai</option>
+                    <option value="Indian">Indian</option>
+                    <option value="Middle Eastern">Middle Eastern</option>
+                    <option value="Caribbean">Caribbean</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="recipeDiet">Diet</label>
+                  <select id="recipeDiet" name="recipeDiet" required>
+                    <option value="">Choose a diet</option>
+                    <option value="None">None</option>
+                    <option value="Vegetarian">Vegetarian</option>
+                    <option value="Vegan">Vegan</option>
+                    <option value="Gluten Free">Gluten Free</option>
+                    <option value="Dairy Free">Dairy Free</option>
+                    <option value="Nut Free">Nut Free</option>
+                    <option value="Keto">Keto</option>
+                    <option value="Pescatarian">Pescatarian</option>
+                    <option value="Halal">Halal</option>
+                    <option value="Low Carb">Low Carb</option>
                   </select>
                 </div>
 

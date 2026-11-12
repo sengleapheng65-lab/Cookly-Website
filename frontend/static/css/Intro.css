@@ -3,13 +3,13 @@
    ================================ */
 
 .hero-section {
-  padding: 32px 0 40px;
+  padding: 54px 0 64px;
   overflow: hidden;
   background-color: var(--cream);
 }
 
 .hero-grid {
-  min-height: 700px;
+  min-height: 650px;
   display: grid;
   grid-template-columns: 0.95fr 1.05fr;
   align-items: center;
@@ -28,9 +28,9 @@
 .hero-label {
   margin-bottom: 18px;
   color: var(--accent-orange);
-  font-size: 2rem;
+  font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: 0.2rem;
+  letter-spacing: 0.18rem;
   text-transform: uppercase;
 }
 
@@ -40,7 +40,7 @@
 
   color: var(--dark-green);
   font-family: "Fraunces", serif;
-  font-size: clamp(3.6rem, 4.8vw, 5.25rem);
+  font-size: clamp(3.25rem, 4.8vw, 5.1rem);
   font-weight: 700;
   line-height: 1.04;
   letter-spacing: -0.12rem;
@@ -50,7 +50,7 @@
   max-width: 650px;
   margin-bottom: 30px;
   color: var(--text-gray);
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   line-height: 1.55;
 }
 
@@ -69,6 +69,12 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(38, 52, 45, 0.1);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.recipe-search:focus-within {
+  border-color: rgba(31, 92, 66, 0.45);
+  box-shadow: 0 12px 30px rgba(31, 92, 66, 0.14);
 }
 
 .search-icon {
@@ -414,7 +420,7 @@
   }
 
   .hero-content h1 {
-    font-size: 2.8rem;
+    font-size: clamp(2.55rem, 12vw, 3.2rem);
     letter-spacing: -0.1rem;
   }
 
@@ -464,7 +470,9 @@
     right: 5px;
     bottom: 5px;
     min-width: auto;
+    left: 12px;
     padding: 13px 15px;
+    border-radius: 14px;
   }
 
   .quick-meal-card i {
