@@ -40,6 +40,57 @@ body {
   color: var(--text-dark);
   font-family: "DM Sans", sans-serif;
   line-height: 1.5;
+  transition: transform 0.24s ease, opacity 0.24s ease;
+}
+
+body.page-exiting-left,
+body.page-exiting-right {
+  opacity: 0;
+}
+
+body.page-exiting-left {
+  transform: translateX(-28px);
+}
+
+body.page-exiting-right {
+  transform: translateX(28px);
+}
+
+body.page-entering-left,
+body.page-entering-right {
+  animation-duration: 0.34s;
+  animation-timing-function: ease;
+  animation-fill-mode: both;
+}
+
+body.page-entering-left {
+  animation-name: page-slide-in-left;
+}
+
+body.page-entering-right {
+  animation-name: page-slide-in-right;
+}
+
+@keyframes page-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 body.menu-open {

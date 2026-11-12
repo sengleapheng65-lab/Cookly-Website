@@ -3,8 +3,31 @@
    ================================ */
 
 .popular-recipes-section {
+  position: relative;
   padding: clamp(64px, 8vw, 96px) 0;
   background-color: var(--white);
+}
+
+.popular-recipes-section::before,
+.categories-section::before,
+.share-cta-section::before {
+  content: "";
+  position: absolute;
+  top: -22px;
+  right: 0;
+  left: 0;
+  height: 44px;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  pointer-events: none;
+}
+
+.popular-recipes-section::before,
+.share-cta-section::before {
+  background: var(--white);
+}
+
+.categories-section::before {
+  background: var(--cream);
 }
 
 /* ================================
