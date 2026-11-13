@@ -121,6 +121,26 @@
   cursor: pointer;
 }
 
+.browse-reset-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  color: var(--text-gray);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  font-size: .9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.browse-reset-button:hover {
+  color: var(--dark-green);
+  background: var(--cream);
+}
+
 .browse-search-form > i {
   margin-left: 10px;
   color: var(--text-gray);
@@ -303,6 +323,10 @@
   }
 
   .browse-filter-form button {
+    grid-column: 1 / -1;
+  }
+
+  .browse-reset-button {
     grid-column: 1 / -1;
   }
 

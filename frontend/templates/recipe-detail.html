@@ -61,7 +61,7 @@
   <body>
     {% include 'navbar.html' %}
     <main class="detail-page">
-      <a class="back-link" href="{{ url_for('browse') }}">← Back to recipes</a>
+      <a class="back-link" href="{{ url_for('browse') }}{% if session.get('browse_query') %}?{{ session.get('browse_query') }}{% endif %}">← Back to recipes</a>
       <article class="detail-card">
         {% if recipe.image_filename %}
         <img class="detail-image" src="{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}" alt="{{ recipe.title }}" />

@@ -138,6 +138,14 @@
               aria-label="Search recipes"
             />
 
+            <input type="hidden" name="category" value="{{ filters.category }}" />
+            <input type="hidden" name="difficulty" value="{{ filters.difficulty }}" />
+            <input type="hidden" name="cuisine" value="{{ filters.cuisine }}" />
+            <input type="hidden" name="diet" value="{{ filters.diet }}" />
+            {% for allergy in filters.allergies %}
+            <input type="hidden" name="allergy" value="{{ allergy }}" />
+            {% endfor %}
+
             <button type="submit">Search</button>
           </form>
 
@@ -184,6 +192,7 @@
               </div>
             </fieldset>
             <button type="submit">Apply filters</button>
+            <a class="browse-reset-button" href="{{ url_for('browse') }}">Reset</a>
           </form>
         </div>
       </section>

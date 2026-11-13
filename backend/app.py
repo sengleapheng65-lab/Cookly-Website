@@ -76,11 +76,13 @@ def link_ingredient_to_allergies(cursor, ingredient_id, ingredient_name):
     cursor.execute("SELECT id, name FROM allergies")
     ingredient_words = {singular_word(word) for word in ingredient_name.lower().split()}
     for allergy in cursor.fetchall():
-        allergy_words = [singular_word(word) for word in allergy["name"].lower().split()]
+        allergy_id = allergy[0] if not isinstance(allergy, dict) else allergy['id']
+        allergy_name = allergy[1] if not isinstance(allergy, dict) else allergy['name']
+        allergy_words = [singular_word(word) for word in allergy_name.lower().split()]
         if allergy_words and all(word in ingredient_words for word in allergy_words):
             cursor.execute(
                 "INSERT IGNORE INTO ingredient_allergies (ingredient_id, allergy_id) VALUES (%s, %s)",
-                (ingredient_id, allergy["id"]),
+                (ingredient_id, allergy_id),
             )
 
 
@@ -584,6 +586,10 @@ def unlike_recipe(recipe_id):
 def browse():
     conn = get_db_connection()
     recipes = []
+    if request.query_string:
+        session['browse_query'] = request.query_string.decode('utf-8')
+    else:
+        session.pop('browse_query', None)
     search_term = request.args.get('q', '').strip()
     category_filter = request.args.get('category', '').strip()
     difficulty_filter = request.args.get('difficulty', '').strip()
