@@ -48,7 +48,7 @@
     <header class="navbar">
       <nav class="navbar_container">
         <!-- Cookly logo -->
-        <a class="cookly_brand" href="home.html">
+        <a class="cookly_brand" href="{{ url_for('home') }}">
           <span id="nav_logo" aria-hidden="true">
             <span class="logo_egg"></span>
           </span>
@@ -198,6 +198,14 @@
                     <option value="Low Carb">Low Carb</option>
                   </select>
                 </div>
+
+                <fieldset class="allergy-selector">
+                  <legend>Allergens in this recipe</legend>
+                  <p>Select any allergens that this recipe contains.</p>
+                  {% for value in ['Peanuts', 'Tree Nuts', 'Dairy', 'Eggs', 'Gluten', 'Shellfish', 'Soy', 'Sesame'] %}
+                  <label><input type="checkbox" name="allergies" value="{{ value }}" /> {{ value }}</label>
+                  {% endfor %}
+                </fieldset>
 
                 <div class="form-group">
                   <label for="recipeDifficulty">Difficulty</label>

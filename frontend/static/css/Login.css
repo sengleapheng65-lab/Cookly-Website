@@ -57,7 +57,8 @@
 .auth-card {
   position: relative;
   width: min(1180px, 100%);
-  min-height: 740px;
+  height: min(740px, calc(100vh - 80px));
+  min-height: 0;
   overflow: hidden;
   background-color: #f6fcf8;
   border-radius: 28px;
@@ -130,15 +131,48 @@
 }
 
 .login-brand-icon {
-  width: 58px;
-  height: 58px;
+  position: relative;
+  width: 50px;
+  height: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--white);
-  background-color: var(--dark-green);
-  border-radius: 16px;
-  font-size: 1.65rem;
+  background-color: var(--primary-green);
+  border-radius: 50%;
+}
+
+.login-brand-icon::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 4px;
+  width: 7px;
+  height: 21px;
+  background-color: var(--primary-green);
+  border-radius: 10px;
+  transform: rotate(38deg);
+  transform-origin: bottom center;
+}
+
+.login-logo-egg {
+  position: relative;
+  z-index: 1;
+  width: 27px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--white);
+  border-radius: 58% 42% 55% 45% / 45% 58% 42% 55%;
+  transform: rotate(-10deg);
+}
+
+.login-logo-egg::after {
+  content: "";
+  width: 11px;
+  height: 11px;
+  background-color: #f5b914;
+  border-radius: 50%;
 }
 
 .login-intro {
@@ -472,6 +506,7 @@
 
   .auth-card {
     width: min(440px, 100%);
+    height: auto;
     min-height: auto;
     display: flex;
     flex-direction: column;
@@ -565,9 +600,9 @@
   }
 
   .login-brand-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
   }
 
   .login-intro {
@@ -598,5 +633,23 @@
 
   .login-form-panel {
     padding: 20px 18px 24px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 760px) {
+  .login-main {
+    align-items: flex-start;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    overflow-y: auto;
+  }
+
+  .auth-card {
+    height: calc(100vh - 32px);
+  }
+
+  .login-form-panel {
+    justify-content: flex-start;
+    padding-top: 28px;
   }
 }

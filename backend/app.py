@@ -23,6 +23,50 @@ UPLOAD_DIR = os.path.join(STATIC_DIR, 'uploads')
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 
+def sync_structured_recipe_data(cursor, recipe_id, ingredients_text, instructions_text):
+    """Keep normalized ingredient and instruction tables in sync with legacy form text."""
+    cursor.execute('DELETE FROM recipe_ingredients WHERE recipe_id = %s', (recipe_id,))
+    cursor.execute('DELETE FROM instruction_steps WHERE recipe_id = %s', (recipe_id,))
+
+    ingredient_lines = [
+        line.strip().lstrip('-•*').strip()
+        for line in ingredients_text.splitlines()
+        if line.strip().lstrip('-•*').strip()
+    ]
+    for ingredient_name in ingredient_lines:
+        cursor.execute(
+            'INSERT IGNORE INTO ingredients (name) VALUES (%s)',
+            (ingredient_name[:150],),
+        )
+        cursor.execute('SELECT id FROM ingredients WHERE name = %s', (ingredient_name[:150],))
+        ingredient = cursor.fetchone()
+        ingredient_id = ingredient[0] if not isinstance(ingredient, dict) else ingredient['id']
+        cursor.execute(
+            'INSERT IGNORE INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (%s, %s)',
+            (recipe_id, ingredient_id),
+        )
+
+    instruction_lines = [line.strip() for line in instructions_text.splitlines() if line.strip()]
+    for step_number, instruction in enumerate(instruction_lines, start=1):
+        cursor.execute(
+            'INSERT INTO instruction_steps (recipe_id, step_number, instruction) VALUES (%s, %s, %s)',
+            (recipe_id, step_number, instruction),
+        )
+
+
+def sync_recipe_allergies(cursor, recipe_id, allergy_names):
+    cursor.execute('DELETE FROM recipe_allergies WHERE recipe_id = %s', (recipe_id,))
+    for allergy_name in allergy_names:
+        cursor.execute('SELECT id FROM allergies WHERE name = %s', (allergy_name,))
+        allergy = cursor.fetchone()
+        if allergy:
+            allergy_id = allergy[0] if not isinstance(allergy, dict) else allergy['id']
+            cursor.execute(
+                'INSERT IGNORE INTO recipe_allergies (recipe_id, allergy_id) VALUES (%s, %s)',
+                (recipe_id, allergy_id),
+            )
+
+
 @app.route('/')
 def home():
     conn = get_db_connection()
@@ -160,6 +204,7 @@ def add_recipe():
     category = request.form.get('recipeCategory', '').strip()
     cuisine = request.form.get('recipeCuisine', '').strip()
     diet = request.form.get('recipeDiet', '').strip()
+    allergy_names = request.form.getlist('allergies')
     difficulty = request.form.get('recipeDifficulty', '').strip().title()
     description = request.form.get('recipeDescription', '').strip()
     ingredients = request.form.get('ingredients', '').strip()
@@ -226,6 +271,8 @@ def add_recipe():
                 cooking_time, servings, ingredients, instructions, image_filename,
             ),
         )
+        sync_structured_recipe_data(cursor, cursor.lastrowid, ingredients, instructions)
+        sync_recipe_allergies(cursor, cursor.lastrowid, allergy_names)
         conn.commit()
     except mysql.connector.Error as error:
         conn.rollback()
@@ -267,13 +314,26 @@ def edit_recipe(recipe_id):
         return redirect(url_for('profile'))
 
     if request.method == 'GET':
+        allergy_cursor = conn.cursor(dictionary=True)
+        allergy_cursor.execute(
+            """
+            SELECT allergies.name
+            FROM recipe_allergies
+            JOIN allergies ON allergies.id = recipe_allergies.allergy_id
+            WHERE recipe_allergies.recipe_id = %s
+            """,
+            (recipe_id,),
+        )
+        recipe_allergies = [row['name'] for row in allergy_cursor.fetchall()]
+        allergy_cursor.close()
         conn.close()
-        return render_template('edit-recipe.html', recipe=recipe)
+        return render_template('edit-recipe.html', recipe=recipe, recipe_allergies=recipe_allergies)
 
     title = request.form.get('recipeTitle', '').strip()
     description = request.form.get('recipeDescription', '').strip()
     ingredients = request.form.get('ingredients', '').strip()
     instructions = request.form.get('instructions', '').strip()
+    allergy_names = request.form.getlist('allergies')
     difficulty = request.form.get('recipeDifficulty', '').strip().title()
     try:
         prep_time = int(request.form.get('prepTime', '0'))
@@ -331,6 +391,8 @@ def edit_recipe(recipe_id):
                  servings, ingredients, instructions, recipe_id,
                  session['user_id']),
             )
+        sync_structured_recipe_data(cursor, recipe_id, ingredients, instructions)
+        sync_recipe_allergies(cursor, recipe_id, allergy_names)
         conn.commit()
     except mysql.connector.Error:
         conn.rollback()
@@ -404,6 +466,20 @@ def save_recipe(recipe_id):
             'INSERT IGNORE INTO saved_recipes (user_id, recipe_id) VALUES (%s, %s)',
             (session['user_id'], recipe_id),
         )
+        cursor.execute(
+            "INSERT IGNORE INTO collections (user_id, name) VALUES (%s, 'Favorites')",
+            (session['user_id'],),
+        )
+        cursor.execute(
+            'SELECT id FROM collections WHERE user_id = %s AND name = %s',
+            (session['user_id'], 'Favorites'),
+        )
+        favorite_collection = cursor.fetchone()
+        if favorite_collection:
+            cursor.execute(
+                'INSERT IGNORE INTO collection_recipes (collection_id, recipe_id) VALUES (%s, %s)',
+                (favorite_collection[0], recipe_id),
+            )
         conn.commit()
     finally:
         cursor.close()
@@ -423,6 +499,14 @@ def unsave_recipe(recipe_id):
         cursor = conn.cursor()
         cursor.execute(
             'DELETE FROM saved_recipes WHERE user_id = %s AND recipe_id = %s',
+            (session['user_id'], recipe_id),
+        )
+        cursor.execute(
+            """
+            DELETE cr FROM collection_recipes cr
+            JOIN collections c ON c.id = cr.collection_id
+            WHERE c.user_id = %s AND c.name = 'Favorites' AND cr.recipe_id = %s
+            """,
             (session['user_id'], recipe_id),
         )
         conn.commit()
@@ -488,6 +572,7 @@ def browse():
     difficulty_filter = request.args.get('difficulty', '').strip()
     cuisine_filter = request.args.get('cuisine', '').strip()
     diet_filter = request.args.get('diet', '').strip()
+    allergy_filters = [value.strip() for value in request.args.getlist('allergy') if value.strip()]
 
     if conn:
         cursor = conn.cursor(dictionary=True)
@@ -519,6 +604,24 @@ def browse():
         if diet_filter:
             filter_clause += ' AND d.name = %s'
             query_params.append(diet_filter)
+        if allergy_filters:
+            allergy_placeholders = ', '.join(['%s'] * len(allergy_filters))
+            filter_clause += f"""
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM recipe_ingredients ri
+                    JOIN ingredient_allergies ia ON ia.ingredient_id = ri.ingredient_id
+                    JOIN allergies a ON a.id = ia.allergy_id
+                    WHERE ri.recipe_id = r.id AND a.name IN ({allergy_placeholders})
+                )
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM recipe_allergies ra
+                    JOIN allergies recipe_a ON recipe_a.id = ra.allergy_id
+                    WHERE ra.recipe_id = r.id AND recipe_a.name IN ({allergy_placeholders})
+                )
+            """
+            query_params.extend(allergy_filters + allergy_filters)
 
         cursor.execute(
             f"""
@@ -558,6 +661,7 @@ def browse():
             'difficulty': difficulty_filter,
             'cuisine': cuisine_filter,
             'diet': diet_filter,
+            'allergies': allergy_filters,
         },
     )
 

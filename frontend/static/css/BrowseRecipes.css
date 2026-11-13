@@ -84,6 +84,35 @@
   font: inherit;
 }
 
+.browse-allergy-filter {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+.browse-allergy-filter legend {
+  padding: 0 4px;
+  color: var(--text-gray);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.browse-allergy-filter > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.browse-allergy-filter label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-gray);
+  font-size: .78rem;
+  font-weight: 500;
+}
+
 .browse-filter-form button {
   color: var(--white);
   background: var(--accent-orange);
@@ -198,6 +227,15 @@
 .browse-results-heading p {
   color: var(--text-gray);
   font-size: 1rem;
+}
+
+.browse-results-section .recipe-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.browse-results-section .recipe-card:last-child {
+  grid-column: auto;
+  width: auto;
 }
 
 .browse-empty-message {

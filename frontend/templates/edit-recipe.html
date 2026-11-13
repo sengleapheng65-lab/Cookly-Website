@@ -61,6 +61,15 @@
             </div>
           </div>
           <div class="form-section">
+            <h2>Allergens</h2>
+            <div class="allergy-selector">
+              <p>Select any allergens that this recipe contains.</p>
+              {% for value in ['Peanuts', 'Tree Nuts', 'Dairy', 'Eggs', 'Gluten', 'Shellfish', 'Soy', 'Sesame'] %}
+              <label><input type="checkbox" name="allergies" value="{{ value }}" {% if value in recipe_allergies %}checked{% endif %} /> {{ value }}</label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="form-section">
             <h2>Instructions</h2>
             <div class="form-group form-group-full">
               <label for="instructions">Instructions</label>

@@ -77,6 +77,34 @@
   grid-column: 1 / -1;
 }
 
+.allergy-selector {
+  grid-column: 1 / -1;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.allergy-selector legend {
+  padding: 0 5px;
+  color: var(--dark-green);
+  font-weight: 700;
+}
+
+.allergy-selector p {
+  margin-bottom: 10px;
+  color: var(--text-gray);
+  font-size: .9rem;
+}
+
+.allergy-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 5px 14px 5px 0;
+  color: var(--text-gray);
+  font-size: .9rem;
+}
+
 /* Labels */
 
 .form-group label {

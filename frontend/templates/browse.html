@@ -48,7 +48,7 @@
     <header class="navbar">
       <nav class="navbar_container">
         <!-- Cookly logo -->
-        <a class="cookly_brand" href="home.html">
+        <a class="cookly_brand" href="{{ url_for('home') }}">
           <span id="nav_logo" aria-hidden="true">
             <span class="logo_egg"></span>
           </span>
@@ -175,6 +175,14 @@
                 {% endfor %}
               </select>
             </label>
+            <fieldset class="browse-allergy-filter">
+              <legend>Exclude allergies</legend>
+              <div>
+                {% for value in ['Peanuts', 'Tree Nuts', 'Dairy', 'Eggs', 'Gluten', 'Shellfish', 'Soy', 'Sesame'] %}
+                <label><input type="checkbox" name="allergy" value="{{ value }}" {% if value in filters.allergies %}checked{% endif %} /> {{ value }}</label>
+                {% endfor %}
+              </div>
+            </fieldset>
             <button type="submit">Apply filters</button>
           </form>
         </div>
