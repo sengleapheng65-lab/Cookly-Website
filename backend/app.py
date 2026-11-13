@@ -45,6 +45,7 @@ def sync_structured_recipe_data(cursor, recipe_id, ingredients_text, instruction
             'INSERT IGNORE INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (%s, %s)',
             (recipe_id, ingredient_id),
         )
+        link_ingredient_to_allergies(cursor, ingredient_id, ingredient_name)
 
     instruction_lines = [line.strip() for line in instructions_text.splitlines() if line.strip()]
     for step_number, instruction in enumerate(instruction_lines, start=1):
@@ -64,6 +65,22 @@ def sync_recipe_allergies(cursor, recipe_id, allergy_names):
             cursor.execute(
                 'INSERT IGNORE INTO recipe_allergies (recipe_id, allergy_id) VALUES (%s, %s)',
                 (recipe_id, allergy_id),
+            )
+
+
+def singular_word(word):
+    return word[:-1] if word.endswith("s") else word
+
+
+def link_ingredient_to_allergies(cursor, ingredient_id, ingredient_name):
+    cursor.execute("SELECT id, name FROM allergies")
+    ingredient_words = {singular_word(word) for word in ingredient_name.lower().split()}
+    for allergy in cursor.fetchall():
+        allergy_words = [singular_word(word) for word in allergy["name"].lower().split()]
+        if allergy_words and all(word in ingredient_words for word in allergy_words):
+            cursor.execute(
+                "INSERT IGNORE INTO ingredient_allergies (ingredient_id, allergy_id) VALUES (%s, %s)",
+                (ingredient_id, allergy["id"]),
             )
 
 
@@ -573,9 +590,12 @@ def browse():
     cuisine_filter = request.args.get('cuisine', '').strip()
     diet_filter = request.args.get('diet', '').strip()
     allergy_filters = [value.strip() for value in request.args.getlist('allergy') if value.strip()]
+    allergy_names = []
 
     if conn:
         cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name FROM allergies ORDER BY name")
+        allergy_names = [row["name"] for row in cursor.fetchall()]
         current_user_id = session.get('user_id', 0)
         search_clause = ''
         filter_clause = ''
@@ -586,11 +606,16 @@ def browse():
                 AND (
                     r.title LIKE %s OR r.description LIKE %s OR
                     r.ingredients LIKE %s OR c.name LIKE %s OR
-                    cu.name LIKE %s OR d.name LIKE %s
+                    cu.name LIKE %s OR d.name LIKE %s OR
+                    EXISTS (
+                        SELECT 1 FROM recipe_ingredients found_ri
+                        JOIN ingredients found_ing ON found_ing.id = found_ri.ingredient_id
+                        WHERE found_ri.recipe_id = r.id AND found_ing.name LIKE %s
+                    )
                 )
             """
             search_value = f'%{search_term}%'
-            query_params.extend([search_value] * 6)
+            query_params.extend([search_value] * 7)
 
         if category_filter:
             filter_clause += ' AND c.name = %s'
@@ -663,6 +688,7 @@ def browse():
             'diet': diet_filter,
             'allergies': allergy_filters,
         },
+        allergy_names=allergy_names,
     )
 
 

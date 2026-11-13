@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     source_id INT NULL,
     title VARCHAR(150) NOT NULL,
     description TEXT NOT NULL,
-    difficulty ENUM('Easy', 'Medium', 'Hard') NOT NULL, /* Allowed difficulty levels. */
+    difficulty ENUM('Easy', 'Medium', 'Hard') NOT NULL,
     prep_time_minutes INT NOT NULL,
     cooking_time_minutes INT NOT NULL,
     serving_size INT NOT NULL,
@@ -107,6 +107,24 @@ CREATE TABLE IF NOT EXISTS recipes (
     FOREIGN KEY (diet_type_id) REFERENCES diet_types(id),
     FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE SET NULL,
     FOREIGN KEY (original_recipe_id) REFERENCES recipes(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS collections (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, name),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS collection_recipes (
+    collection_id INT NOT NULL,
+    recipe_id INT NOT NULL,
+    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (collection_id, recipe_id),
+    FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS saved_recipes (
@@ -151,24 +169,6 @@ CREATE TABLE IF NOT EXISTS recipe_allergies (
     PRIMARY KEY (recipe_id, allergy_id),
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
     FOREIGN KEY (allergy_id) REFERENCES allergies(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS collections (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, name),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS collection_recipes (
-    collection_id INT NOT NULL,
-    recipe_id INT NOT NULL,
-    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (collection_id, recipe_id),
-    FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
-    FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS comments (
