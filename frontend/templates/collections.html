@@ -48,6 +48,15 @@
     {% include 'navbar.html' %}
 
     <main>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="server-flashes" role="status">
+          {% for category, message in messages %}
+          <p class="server-flash {{ category }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
       <!-- ================================
        MY COLLECTIONS PAGE
        ================================ -->
@@ -67,6 +76,12 @@
               <i class="bi bi-arrow-right" aria-hidden="true"></i>
             </a>
           </div>
+
+          <form class="create-collection-form" method="POST" action="{{ url_for('create_collection') }}">
+            <label for="collectionName">New collection</label>
+            <input id="collectionName" name="name" type="text" maxlength="100" placeholder="Weeknight dinners" required />
+            <button type="submit">Create collection</button>
+          </form>
 
           <!-- Collection tabs -->
           <div
@@ -94,35 +109,44 @@
           </div>
 
           <div id="savedCollection" class="collection-content">
-          {% if saved_recipes %}
-          <div class="recipe-grid">
-            {% for recipe in saved_recipes %}
-            <article class="recipe-card">
-              <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
-                <div
-                  class="recipe-image recipe-image-bowl"
-                  {% if recipe.image_filename %}
-                  style="background-image: url('{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}');"
-                  {% endif %}
-                >
-                  <span class="recipe-category">{{ recipe.category_name }}</span>
-                </div>
-                <div class="recipe-card-content">
-                  <h3>{{ recipe.title }}</h3>
-                  <div class="recipe-details">
-                    <span><i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.cooking_time_minutes }} minutes</span>
-                    <span>{{ recipe.difficulty }}</span>
+          {% if named_collections %}
+          {% for collection in named_collections %}
+          <section class="named-collection">
+            <h2>{{ collection.name }}</h2>
+            {% if collection.recipes %}
+            <div class="recipe-grid">
+              {% for recipe in collection.recipes %}
+              <article class="recipe-card">
+                <a class="recipe-card-link" href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">
+                  <div
+                    class="recipe-image recipe-image-bowl"
+                    {% if recipe.image_filename %}
+                    style="background-image: url('{{ url_for('static', filename='uploads/' ~ recipe.image_filename) }}');"
+                    {% endif %}
+                  >
+                    <span class="recipe-category">{{ recipe.category_name }}</span>
                   </div>
-                </div>
-              </a>
-              <form method="POST" action="{{ url_for('unsave_recipe', recipe_id=recipe.id) }}">
-                <button class="save-recipe saved" type="submit" aria-label="Remove from collections">
-                  <i class="bi bi-heart-fill" aria-hidden="true"></i>
-                </button>
-              </form>
-            </article>
-            {% endfor %}
-          </div>
+                  <div class="recipe-card-content">
+                    <h3>{{ recipe.title }}</h3>
+                    <div class="recipe-details">
+                      <span><i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.cooking_time_minutes }} minutes</span>
+                      <span>{{ recipe.difficulty }}</span>
+                    </div>
+                  </div>
+                </a>
+                <form method="POST" action="{{ url_for('remove_from_collection', collection_id=collection.id, recipe_id=recipe.id) }}">
+                  <button class="save-recipe saved" type="submit" aria-label="Remove from {{ collection.name }}">
+                    <i class="bi bi-heart-fill" aria-hidden="true"></i>
+                  </button>
+                </form>
+              </article>
+              {% endfor %}
+            </div>
+            {% else %}
+            <p class="named-collection-empty">No recipes in this collection yet.</p>
+            {% endif %}
+          </section>
+          {% endfor %}
           {% else %}
           <!-- Empty saved-recipes state -->
           <div class="collection-empty-state">

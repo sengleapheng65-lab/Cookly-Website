@@ -31,6 +31,8 @@
       .detail-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 34px; padding-top: 28px; border-top: 1px solid #e7dfd3; }
       .detail-columns h2 { color: #174f3a; font-family: "Fraunces", serif; font-size: 1.7rem; }
       .detail-text { white-space: pre-line; color: #56635c; line-height: 1.7; }
+      .server-flash { margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: #e8f6ee; color: #174f3a; }
+      .server-flash.error { background: #fdecea; color: #9c3b34; }
       .back-link { display: inline-block; margin-bottom: 20px; color: #1f5c42; font-weight: 700; text-decoration: none; }
       .comments-section { margin-top: 40px; padding: 34px 0 0; border-top: 1px solid #e7dfd3; }
       .comments-section h2 { margin: 0 0 20px; color: #174f3a; font-family: "Fraunces", serif; font-size: 1.7rem; }
@@ -61,6 +63,15 @@
   <body>
     {% include 'navbar.html' %}
     <main class="detail-page">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div role="status">
+          {% for category, message in messages %}
+          <p class="server-flash {{ category }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
       <a class="back-link" href="{{ url_for('browse') }}{% if session.get('browse_query') %}?{{ session.get('browse_query') }}{% endif %}">← Back to recipes</a>
       <article class="detail-card">
         {% if recipe.image_filename %}
@@ -94,6 +105,22 @@
             <span><span class="like-count-value">{{ recipe.like_count }}</span> likes</span>
             <a href="#comments"><i class="bi bi-chat" aria-hidden="true"></i> <span class="comment-count-value">{{ comments|length }}</span> comments</a>
           </div>
+          {% if session.get('user_id') %}
+          <form class="comment-form" method="POST" action="{{ url_for('add_to_collection', recipe_id=recipe.id) }}">
+            <label for="collectionId">Add to a collection</label>
+            {% if user_collections %}
+            <select id="collectionId" name="collection_id" required>
+              {% for collection in user_collections %}
+              <option value="{{ collection.id }}">{{ collection.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit">Save to collection</button>
+            {% else %}
+            <p>Create a collection first, then you can save this recipe there.</p>
+            <a href="{{ url_for('collections') }}">Go to my collections</a>
+            {% endif %}
+          </form>
+          {% endif %}
           <p class="detail-description">{{ recipe.description }}</p>
           <div class="detail-columns">
             <section><h2>Ingredients</h2><div class="detail-text">{{ recipe.ingredients }}</div></section>

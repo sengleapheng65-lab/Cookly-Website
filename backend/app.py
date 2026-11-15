@@ -565,6 +565,109 @@ def save_recipe(recipe_id):
     return redirect(destination.split('#', 1)[0] + f'#recipe-card-{recipe_id}')
 
 
+@app.post('/collections')
+def create_collection():
+    if 'user_id' not in session:
+        flash('Please sign in to create a collection.', 'error')
+        return redirect(url_for('login'))
+
+    name = request.form.get('name', '').strip()
+    if not name:
+        flash('Give the collection a name.', 'error')
+        return redirect(url_for('collections'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('collections'))
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'INSERT INTO collections (user_id, name) VALUES (%s, %s)',
+            (session['user_id'], name[:100]),
+        )
+        conn.commit()
+        flash(f'Collection "{name}" created.', 'success')
+    except mysql.connector.Error as error:
+        conn.rollback()
+        if error.errno == 1062:
+            flash('You already have a collection with that name.', 'error')
+        else:
+            flash('Unable to create that collection.', 'error')
+    finally:
+        cursor.close()
+        conn.close()
+    return redirect(url_for('collections'))
+
+
+@app.post('/recipes/<int:recipe_id>/collections')
+def add_to_collection(recipe_id):
+    if 'user_id' not in session:
+        flash('Please sign in to save a recipe to a collection.', 'error')
+        return redirect(url_for('login'))
+
+    collection_id = request.form.get('collection_id', '').strip()
+    if not collection_id.isdigit():
+        flash('Choose one of your collections.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            'SELECT id FROM collections WHERE id = %s AND user_id = %s',
+            (int(collection_id), session['user_id']),
+        )
+        if not cursor.fetchone():
+            flash('That collection is not yours.', 'error')
+            return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+        cursor.execute('SELECT id FROM recipes WHERE id = %s', (recipe_id,))
+        if not cursor.fetchone():
+            flash('Recipe not found.', 'error')
+            return redirect(url_for('browse'))
+        cursor.execute(
+            'INSERT IGNORE INTO collection_recipes (collection_id, recipe_id) VALUES (%s, %s)',
+            (int(collection_id), recipe_id),
+        )
+        conn.commit()
+        flash('Recipe added to your collection.', 'success')
+    except mysql.connector.Error:
+        conn.rollback()
+        flash('Unable to add this recipe to the collection.', 'error')
+    finally:
+        cursor.close()
+        conn.close()
+    return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+
+@app.post('/collections/<int:collection_id>/recipes/<int:recipe_id>/remove')
+def remove_from_collection(collection_id, recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            DELETE cr FROM collection_recipes cr
+            JOIN collections c ON c.id = cr.collection_id
+            WHERE cr.collection_id = %s AND cr.recipe_id = %s AND c.user_id = %s
+            """,
+            (collection_id, recipe_id, session['user_id']),
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    flash('Recipe removed from that collection.', 'success')
+    return redirect(url_for('collections'))
+
+
 @app.post('/recipes/<int:recipe_id>/unsave')
 def unsave_recipe(recipe_id):
     if 'user_id' not in session:
@@ -814,6 +917,13 @@ def recipe_detail(recipe_id):
         except mysql.connector.Error:
             # Keep recipe pages available before the comments migration runs.
             comments = []
+    user_collections = []
+    if recipe and session.get('user_id'):
+        cursor.execute(
+            'SELECT id, name FROM collections WHERE user_id = %s ORDER BY name',
+            (session['user_id'],),
+        )
+        user_collections = cursor.fetchall()
     cursor.close()
     conn.close()
 
@@ -826,6 +936,7 @@ def recipe_detail(recipe_id):
         recipe=recipe,
         comments=comments,
         variations=variations,
+        user_collections=user_collections,
     )
 
 
@@ -1021,20 +1132,33 @@ def collections():
     conn = get_db_connection()
     saved_recipes = []
     created_recipes = []
+    named_collections = []
     if conn:
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
             """
-            SELECT r.*, c.name AS category_name
-            FROM saved_recipes s
-            JOIN recipes r ON r.id = s.recipe_id
+            SELECT col.id AS collection_id, col.name AS collection_name,
+                   r.id, r.title, r.cooking_time_minutes, r.difficulty,
+                   r.image_filename, c.name AS category_name
+            FROM collections col
+            LEFT JOIN collection_recipes cr ON cr.collection_id = col.id
+            LEFT JOIN recipes r ON r.id = cr.recipe_id
             LEFT JOIN categories c ON r.catergory_id = c.id
-            WHERE s.user_id = %s
-            ORDER BY s.saved_at DESC
+            WHERE col.user_id = %s
+            ORDER BY col.name, cr.saved_at DESC
             """,
             (session['user_id'],),
         )
-        saved_recipes = cursor.fetchall()
+        grouped = {}
+        for row in cursor.fetchall():
+            collection = grouped.setdefault(row['collection_id'], {
+                'id': row['collection_id'],
+                'name': row['collection_name'],
+                'recipes': [],
+            })
+            if row['id']:
+                collection['recipes'].append(row)
+        named_collections = list(grouped.values())
         cursor.execute(
             """
             SELECT r.*, c.name AS category_name
@@ -1053,6 +1177,7 @@ def collections():
         'collections.html',
         saved_recipes=saved_recipes,
         created_recipes=created_recipes,
+        named_collections=named_collections,
     )
 
 
