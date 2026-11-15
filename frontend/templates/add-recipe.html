@@ -146,6 +146,7 @@
                     id="recipeTitle"
                     name="recipeTitle"
                     placeholder="Example: Creamy Tomato Pasta"
+                    value="{% if original %}{{ original.title }} variation{% endif %}"
                     required
                   />
                 </div>
@@ -319,6 +320,25 @@
                   placeholder="1. Boil the pasta.&#10;2. Prepare the tomato sauce.&#10;3. Combine the pasta and sauce.&#10;4. Serve with fresh basil."
                   required
                 ></textarea>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h2>Original source</h2>
+              <p>Optional. Use this when the recipe came from a cookbook or website.</p>
+              {% if original %}
+              <input type="hidden" name="originalRecipeId" value="{{ original.id }}" />
+              <p>This will be saved as a variation of {{ original.title }}.</p>
+              {% endif %}
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="sourceName">Source name</label>
+                  <input id="sourceName" name="sourceName" type="text" placeholder="Example: Family cookbook" />
+                </div>
+                <div class="form-group">
+                  <label for="sourceUrl">Source link</label>
+                  <input id="sourceUrl" name="sourceUrl" type="url" placeholder="https://example.com/recipe" />
+                </div>
               </div>
             </div>
 

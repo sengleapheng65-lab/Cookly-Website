@@ -68,6 +68,22 @@ def sync_recipe_allergies(cursor, recipe_id, allergy_names):
             )
 
 
+def save_recipe_source(cursor, source_name, source_url):
+    source_name = (source_name or '').strip()
+    source_url = (source_url or '').strip() or None
+    if not source_name:
+        return None
+    cursor.execute(
+        """
+        INSERT INTO sources (name, url)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)
+        """,
+        (source_name, source_url),
+    )
+    return cursor.lastrowid
+
+
 def singular_word(word):
     return word[:-1] if word.endswith("s") else word
 
@@ -217,7 +233,25 @@ def add_recipe():
         return redirect(url_for('login'))
 
     if request.method == 'GET':
-        return render_template('add-recipe.html')
+        original = None
+        original_id = request.args.get('from', type=int)
+        if original_id:
+            conn = get_db_connection()
+            if conn:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute(
+                    """
+                    SELECT id, title, description, ingredients, instructions,
+                           difficulty, prep_time_minutes, cooking_time_minutes,
+                           serving_size
+                    FROM recipes WHERE id = %s
+                    """,
+                    (original_id,),
+                )
+                original = cursor.fetchone()
+                cursor.close()
+                conn.close()
+        return render_template('add-recipe.html', original=original)
 
     title = request.form.get('recipeTitle', '').strip()
     category = request.form.get('recipeCategory', '').strip()
@@ -228,6 +262,10 @@ def add_recipe():
     description = request.form.get('recipeDescription', '').strip()
     ingredients = request.form.get('ingredients', '').strip()
     instructions = request.form.get('instructions', '').strip()
+    source_name = request.form.get('sourceName', '').strip()
+    source_url = request.form.get('sourceUrl', '').strip()
+    raw_original_id = request.form.get('originalRecipeId', '').strip()
+    original_recipe_id = int(raw_original_id) if raw_original_id.isdigit() else None
     image = request.files.get('recipeImage')
 
     try:
@@ -275,19 +313,26 @@ def add_recipe():
             flash('One of the selected recipe classifications is invalid.', 'error')
             return redirect(url_for('add_recipe'))
 
+        if original_recipe_id:
+            cursor.execute('SELECT id FROM recipes WHERE id = %s', (original_recipe_id,))
+            if not cursor.fetchone():
+                original_recipe_id = None
+
+        source_id = save_recipe_source(cursor, source_name, source_url)
         cursor.execute(
             """
             INSERT INTO recipes (
-                user_id, catergory_id, cuisine_id, diet_type_id, title,
-                description, difficulty, prep_time_minutes,
+                user_id, catergory_id, cuisine_id, diet_type_id, source_id,
+                original_recipe_id, title, description, difficulty, prep_time_minutes,
                 cooking_time_minutes, serving_size, ingredients, instructions,
                 image_filename
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             (
                 session['user_id'], category_row['id'], cuisine_row['id'],
-                diet_row['id'], title, description, difficulty, prep_time,
-                cooking_time, servings, ingredients, instructions, image_filename,
+                diet_row['id'], source_id, original_recipe_id, title, description,
+                difficulty, prep_time, cooking_time, servings, ingredients,
+                instructions, image_filename,
             ),
         )
         sync_structured_recipe_data(cursor, cursor.lastrowid, ingredients, instructions)
@@ -344,6 +389,14 @@ def edit_recipe(recipe_id):
             (recipe_id,),
         )
         recipe_allergies = [row['name'] for row in allergy_cursor.fetchall()]
+        if recipe.get('source_id'):
+            allergy_cursor.execute(
+                'SELECT name, url FROM sources WHERE id = %s',
+                (recipe['source_id'],),
+            )
+            source = allergy_cursor.fetchone()
+            recipe['source_name'] = source['name'] if source else ''
+            recipe['source_url'] = source['url'] if source else ''
         allergy_cursor.close()
         conn.close()
         return render_template('edit-recipe.html', recipe=recipe, recipe_allergies=recipe_allergies)
@@ -353,6 +406,8 @@ def edit_recipe(recipe_id):
     ingredients = request.form.get('ingredients', '').strip()
     instructions = request.form.get('instructions', '').strip()
     allergy_names = request.form.getlist('allergies')
+    source_name = request.form.get('sourceName', '').strip()
+    source_url = request.form.get('sourceUrl', '').strip()
     difficulty = request.form.get('recipeDifficulty', '').strip().title()
     try:
         prep_time = int(request.form.get('prepTime', '0'))
@@ -381,8 +436,9 @@ def edit_recipe(recipe_id):
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         image.save(os.path.join(UPLOAD_DIR, new_image_filename))
 
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     try:
+        source_id = save_recipe_source(cursor, source_name, source_url)
         if new_image_filename:
             cursor.execute(
                 """
@@ -390,12 +446,12 @@ def edit_recipe(recipe_id):
                 SET title=%s, description=%s, difficulty=%s,
                     prep_time_minutes=%s, cooking_time_minutes=%s,
                     serving_size=%s, ingredients=%s, instructions=%s,
-                    image_filename=%s
+                    image_filename=%s, source_id=%s
                 WHERE id=%s AND user_id=%s
                 """,
                 (title, description, difficulty, prep_time, cooking_time,
                  servings, ingredients, instructions, new_image_filename,
-                 recipe_id, session['user_id']),
+                 source_id, recipe_id, session['user_id']),
             )
         else:
             cursor.execute(
@@ -403,11 +459,12 @@ def edit_recipe(recipe_id):
                 UPDATE recipes
                 SET title=%s, description=%s, difficulty=%s,
                     prep_time_minutes=%s, cooking_time_minutes=%s,
-                    serving_size=%s, ingredients=%s, instructions=%s
+                    serving_size=%s, ingredients=%s, instructions=%s,
+                    source_id=%s
                 WHERE id=%s AND user_id=%s
                 """,
                 (title, description, difficulty, prep_time, cooking_time,
-                 servings, ingredients, instructions, recipe_id,
+                 servings, ingredients, instructions, source_id, recipe_id,
                  session['user_id']),
             )
         sync_structured_recipe_data(cursor, recipe_id, ingredients, instructions)
@@ -710,6 +767,8 @@ def recipe_detail(recipe_id):
         """
         SELECT r.*, u.full_name AS author_name, c.name AS category_name,
                cu.name AS cuisine_name, d.name AS diet_name,
+               sources.name AS source_name, sources.url AS source_url,
+               original.title AS original_title,
                (SELECT COUNT(*) FROM recipe_likes WHERE recipe_id = r.id) AS like_count,
                EXISTS(
                    SELECT 1 FROM recipe_likes
@@ -721,11 +780,20 @@ def recipe_detail(recipe_id):
         LEFT JOIN categories c ON r.catergory_id = c.id
         LEFT JOIN cuisines cu ON r.cuisine_id = cu.id
         LEFT JOIN diet_types d ON r.diet_type_id = d.id
+        LEFT JOIN sources ON sources.id = r.source_id
+        LEFT JOIN recipes original ON original.id = r.original_recipe_id
         WHERE r.id = %s
         """,
         (session.get('user_id', 0), recipe_id),
     )
     recipe = cursor.fetchone()
+    variations = []
+    if recipe:
+        cursor.execute(
+            'SELECT id, title FROM recipes WHERE original_recipe_id = %s ORDER BY title',
+            (recipe_id,),
+        )
+        variations = cursor.fetchall()
     comments = []
     if recipe:
         try:
@@ -753,7 +821,12 @@ def recipe_detail(recipe_id):
         flash('Recipe not found.', 'error')
         return redirect(url_for('browse'))
 
-    return render_template('recipe-detail.html', recipe=recipe, comments=comments)
+    return render_template(
+        'recipe-detail.html',
+        recipe=recipe,
+        comments=comments,
+        variations=variations,
+    )
 
 
 @app.route('/users/<int:user_id>')

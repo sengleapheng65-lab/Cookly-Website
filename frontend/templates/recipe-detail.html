@@ -69,6 +69,22 @@
         <div class="detail-content">
           <h1>{{ recipe.title }}</h1>
           <p class="detail-meta">By {{ recipe.author_name }} · {{ recipe.category_name }} · {{ recipe.cuisine_name }} · {{ recipe.difficulty }} · {{ recipe.cooking_time_minutes }} minutes</p>
+          {% if recipe.original_title %}
+          <p class="detail-meta">Variation of {{ recipe.original_title }}</p>
+          {% endif %}
+          {% if recipe.source_name %}
+          <p class="detail-meta">Source: {% if recipe.source_url %}<a href="{{ recipe.source_url }}">{{ recipe.source_name }}</a>{% else %}{{ recipe.source_name }}{% endif %}</p>
+          {% endif %}
+          {% if session.get('user_id') %}
+          <p class="detail-meta"><a href="{{ url_for('add_recipe') }}?from={{ recipe.id }}">Post a variation</a></p>
+          {% endif %}
+          {% if variations %}
+          <p class="detail-meta">Variations:
+            {% for variation in variations %}
+            <a href="{{ url_for('recipe_detail', recipe_id=variation.id) }}">{{ variation.title }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </p>
+          {% endif %}
           <div class="detail-stats">
             {% if session.get('user_id') %}
             <form class="like-form detail-like-form" method="POST" action="{{ url_for('unlike_recipe' if recipe.is_liked else 'like_recipe', recipe_id=recipe.id) }}" data-liked="{{ 'true' if recipe.is_liked else 'false' }}">
