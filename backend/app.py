@@ -125,6 +125,25 @@ def remove_uploaded_files(filenames):
             os.remove(path)
 
 
+def delete_recipe_record(cursor, recipe_id):
+    """Delete one recipe and the rows that belong to it. Leave variations in place."""
+    cursor.execute(
+        'SELECT id, image_filename FROM recipes WHERE id = %s',
+        (recipe_id,),
+    )
+    recipe = cursor.fetchone()
+    if not recipe:
+        return None
+    cursor.execute(
+        'UPDATE recipes SET original_recipe_id = NULL WHERE original_recipe_id = %s',
+        (recipe_id,),
+    )
+    for table in RECIPE_CHILD_TABLES:
+        delete_rows_if_present(cursor, table, 'recipe_id', [recipe_id])
+    cursor.execute('DELETE FROM recipes WHERE id = %s', (recipe_id,))
+    return recipe.get('image_filename')
+
+
 def delete_registered_user(cursor, user_id):
     """Remove a registered account and the rows that belong to it."""
     cursor.execute(
@@ -1248,6 +1267,77 @@ def moderation_users():
         cursor.close()
         conn.close()
     return render_template('moderation-users.html', users=users)
+
+
+@app.route('/moderation/duplicates')
+def moderation_duplicates():
+    if not require_moderator():
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    duplicate_groups = []
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            """
+            SELECT recipes.id, recipes.title, recipes.created_at,
+                   users.full_name AS author_name
+            FROM recipes
+            JOIN users ON users.id = recipes.user_id
+            ORDER BY recipes.created_at
+            """
+        )
+        grouped = {}
+        for recipe in cursor.fetchall():
+            key = recipe['title'].strip().lower()
+            group = grouped.setdefault(key, {'title': recipe['title'].strip(), 'recipes': []})
+            group['recipes'].append(recipe)
+        duplicate_groups = [group for group in grouped.values() if len(group['recipes']) > 1]
+        duplicate_groups.sort(key=lambda group: group['title'].lower())
+        cursor.close()
+        conn.close()
+    return render_template('moderation-duplicates.html', duplicate_groups=duplicate_groups)
+
+
+@app.post('/moderation/duplicates/<int:recipe_id>/delete')
+def delete_duplicate_recipe(recipe_id):
+    if not require_moderator():
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('moderation_duplicates'))
+
+    cursor = conn.cursor(dictionary=True)
+    filename = None
+    try:
+        cursor.execute('SELECT title FROM recipes WHERE id = %s', (recipe_id,))
+        recipe = cursor.fetchone()
+        if not recipe:
+            flash('Recipe not found.', 'error')
+            return redirect(url_for('moderation_duplicates'))
+        cursor.execute(
+            'SELECT COUNT(*) AS total FROM recipes WHERE LOWER(TRIM(title)) = LOWER(TRIM(%s))',
+            (recipe['title'],),
+        )
+        if cursor.fetchone()['total'] < 2:
+            flash('That recipe is no longer a duplicate.', 'error')
+            return redirect(url_for('moderation_duplicates'))
+        filename = delete_recipe_record(cursor, recipe_id)
+        conn.commit()
+    except mysql.connector.Error:
+        conn.rollback()
+        flash('Unable to remove that recipe.', 'error')
+        return redirect(url_for('moderation_duplicates'))
+    finally:
+        cursor.close()
+        conn.close()
+
+    if filename:
+        remove_uploaded_files([filename])
+    flash('Duplicate recipe removed.', 'success')
+    return redirect(url_for('moderation_duplicates'))
 
 
 def set_user_suspension(user_id, suspended):

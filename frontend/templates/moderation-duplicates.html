@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moderation | Cookly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navbar.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+      .moderation-page { width: min(900px, calc(100% - 32px)); margin: 48px auto 80px; }
+      .moderation-page h1 { margin: 0 0 8px; color: #174f3a; font-family: Fraunces, serif; }
+      .moderation-intro { margin: 0 0 24px; color: #68756e; }
+      .moderation-switch { display: flex; gap: 16px; margin: 0 0 22px; }
+      .moderation-switch a { color: #68756e; font-weight: 700; text-decoration: none; }
+      .moderation-switch a.active { color: #174f3a; border-bottom: 2px solid #1f5c42; }
+      .server-flash { margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: #e8f6ee; color: #174f3a; }
+      .server-flash.error { background: #fdecea; color: #9c3b34; }
+      .moderation-list { display: grid; gap: 14px; }
+      .moderation-item { padding: 18px; background: #fff; border: 1px solid #e3e9e3; border-radius: 15px; box-shadow: 0 5px 16px rgba(38, 52, 45, .055); }
+      .duplicate-title { margin: 0 0 12px; color: #174f3a; font-size: 1.15rem; }
+      .duplicate-copy { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #e3e9e3; }
+      .duplicate-copy a { color: #1f5c42; font-weight: 700; }
+      .duplicate-author { margin: 4px 0 0; color: #68756e; font-size: .85rem; }
+      .remove-button { padding: 9px 13px; color: #9c3b34; background: #fff; border: 1px solid #e7c4c0; border-radius: 9px; font-weight: 700; cursor: pointer; }
+      .empty-moderation { padding: 28px; color: #68756e; background: #fff; border: 1px solid #e3e9e3; border-radius: 15px; }
+    </style>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <main class="moderation-page">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div role="status">
+          {% for category, message in messages %}
+          <p class="server-flash {{ category }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
+      <nav class="moderation-switch">
+        <a href="{{ url_for('moderation_comments') }}">Hidden comments</a>
+        <a href="{{ url_for('moderation_users') }}">Users</a>
+        <a class="active" href="{{ url_for('moderation_duplicates') }}">Duplicates</a>
+      </nav>
+      <h1>Duplicate recipes</h1>
+      <p class="moderation-intro">Recipes with the same title are grouped here. Removing one copy leaves the others in place.</p>
+      <section class="moderation-list">
+        {% for group in duplicate_groups %}
+        <article class="moderation-item">
+          <h2 class="duplicate-title">{{ group.title }}</h2>
+          {% for recipe in group.recipes %}
+          <div class="duplicate-copy">
+            <div>
+              <a href="{{ url_for('recipe_detail', recipe_id=recipe.id) }}">{{ recipe.title }}</a>
+              <p class="duplicate-author">Posted by {{ recipe.author_name }}{% if recipe.created_at %} · {{ recipe.created_at.strftime('%b %-d, %Y') }}{% endif %}</p>
+            </div>
+            <form method="POST" action="{{ url_for('delete_duplicate_recipe', recipe_id=recipe.id) }}" onsubmit="return confirm('Remove this copy?');">
+              <button class="remove-button" type="submit">Remove</button>
+            </form>
+          </div>
+          {% endfor %}
+        </article>
+        {% else %}
+        <p class="empty-moderation">There are no duplicate recipe titles.</p>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>
