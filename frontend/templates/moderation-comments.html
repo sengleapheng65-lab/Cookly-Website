@@ -17,11 +17,18 @@
       .moderation-item a { color: #1f5c42; font-weight: 700; }
       .restore-button { padding: 9px 13px; color: #fff; background: #1f5c42; border: 0; border-radius: 9px; font-weight: 700; cursor: pointer; }
       .empty-moderation { padding: 28px; color: #68756e; background: #fff; border: 1px solid #e3e9e3; border-radius: 15px; }
+      .moderation-switch { display: flex; gap: 16px; margin: 0 0 22px; }
+      .moderation-switch a { color: #68756e; font-weight: 700; text-decoration: none; }
+      .moderation-switch a.active { color: #174f3a; border-bottom: 2px solid #1f5c42; }
     </style>
   </head>
   <body>
     {% include 'navbar.html' %}
     <main class="moderation-page">
+      <nav class="moderation-switch">
+        <a class="active" href="{{ url_for('moderation_comments') }}">Hidden comments</a>
+        <a href="{{ url_for('moderation_users') }}">Users</a>
+      </nav>
       <h1>Hidden comments</h1>
       <p class="moderation-intro">Review comments hidden from public view and restore them when appropriate.</p>
       <section class="moderation-list">

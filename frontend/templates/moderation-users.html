@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Moderation | Cookly</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navbar.css') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <style>
+      .moderation-page { width: min(900px, calc(100% - 32px)); margin: 48px auto 80px; }
+      .moderation-page h1 { margin: 0 0 8px; color: #174f3a; font-family: Fraunces, serif; }
+      .moderation-intro { margin: 0 0 24px; color: #68756e; }
+      .moderation-switch { display: flex; gap: 16px; margin: 0 0 22px; }
+      .moderation-switch a { color: #68756e; font-weight: 700; text-decoration: none; }
+      .moderation-switch a.active { color: #174f3a; border-bottom: 2px solid #1f5c42; }
+      .server-flash { margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: #e8f6ee; color: #174f3a; }
+      .server-flash.error { background: #fdecea; color: #9c3b34; }
+      .moderation-list { display: grid; gap: 14px; }
+      .moderation-item { padding: 18px; background: #fff; border: 1px solid #e3e9e3; border-radius: 15px; box-shadow: 0 5px 16px rgba(38, 52, 45, .055); }
+      .moderation-meta { display: flex; justify-content: space-between; gap: 12px; color: #68756e; font-size: .85rem; }
+      .moderation-meta strong { color: #174f3a; }
+      .user-email { margin: 8px 0 0; color: #4e5d54; }
+      .user-status { display: inline-block; margin-top: 10px; color: #1f5c42; font-size: .85rem; font-weight: 700; }
+      .user-status.suspended { color: #9c3b34; }
+      .user-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .user-actions form { margin: 0; }
+      .restore-button, .suspend-button, .remove-button { padding: 9px 13px; border-radius: 9px; font-weight: 700; cursor: pointer; }
+      .restore-button { color: #fff; background: #1f5c42; border: 0; }
+      .suspend-button { color: #1f5c42; background: #fff; border: 1px solid #1f5c42; }
+      .remove-button { color: #9c3b34; background: #fff; border: 1px solid #e7c4c0; }
+      .empty-moderation { padding: 28px; color: #68756e; background: #fff; border: 1px solid #e3e9e3; border-radius: 15px; }
+    </style>
+  </head>
+  <body>
+    {% include 'navbar.html' %}
+    <main class="moderation-page">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div role="status">
+          {% for category, message in messages %}
+          <p class="server-flash {{ category }}">{{ message }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+      {% endwith %}
+      <nav class="moderation-switch">
+        <a href="{{ url_for('moderation_comments') }}">Hidden comments</a>
+        <a class="active" href="{{ url_for('moderation_users') }}">Users</a>
+      </nav>
+      <h1>Registered users</h1>
+      <p class="moderation-intro">Suspend an account to block sign-in, or remove it when the account and its recipes should be deleted.</p>
+      <section class="moderation-list">
+        {% for user in users %}
+        <article class="moderation-item">
+          <div class="moderation-meta">
+            <strong>{{ user.full_name }}</strong>
+            <span>{{ user.created_at.strftime('%b %-d, %Y') if user.created_at else '' }}</span>
+          </div>
+          <p class="user-email">{{ user.email }}</p>
+          <p class="user-status {% if user.is_suspended %}suspended{% endif %}">
+            {{ 'Suspended' if user.is_suspended else 'Active' }} · {{ user.recipe_count }} recipe{{ '' if user.recipe_count == 1 else 's' }}
+          </p>
+          <div class="user-actions">
+            {% if user.is_suspended %}
+            <form method="POST" action="{{ url_for('restore_user', user_id=user.id) }}">
+              <button class="restore-button" type="submit">Restore</button>
+            </form>
+            {% else %}
+            <form method="POST" action="{{ url_for('suspend_user', user_id=user.id) }}">
+              <button class="suspend-button" type="submit">Suspend</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" onsubmit="return confirm('Remove this account and its recipes?');">
+              <button class="remove-button" type="submit">Remove</button>
+            </form>
+          </div>
+        </article>
+        {% else %}
+        <p class="empty-moderation">There are no registered users.</p>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>

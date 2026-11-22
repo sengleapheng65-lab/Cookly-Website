@@ -88,6 +88,99 @@ def singular_word(word):
     return word[:-1] if word.endswith("s") else word
 
 
+RECIPE_CHILD_TABLES = (
+    'collection_recipes',
+    'saved_recipes',
+    'recipe_likes',
+    'comments',
+    'recipe_ingredients',
+    'instruction_steps',
+    'recipe_allergies',
+    'instructions',
+)
+
+
+def delete_rows_if_present(cursor, table, column, row_ids):
+    """Delete matching rows. Skip a table that this database does not have."""
+    if not row_ids:
+        return
+    placeholders = ','.join(['%s'] * len(row_ids))
+    try:
+        cursor.execute(
+            f'DELETE FROM {table} WHERE {column} IN ({placeholders})',
+            tuple(row_ids),
+        )
+    except mysql.connector.Error as error:
+        if error.errno != 1146:
+            raise
+
+
+def remove_uploaded_files(filenames):
+    for filename in filenames:
+        safe_name = os.path.basename(filename or '')
+        if not safe_name:
+            continue
+        path = os.path.join(UPLOAD_DIR, safe_name)
+        if os.path.isfile(path):
+            os.remove(path)
+
+
+def delete_registered_user(cursor, user_id):
+    """Remove a registered account and the rows that belong to it."""
+    cursor.execute(
+        """
+        SELECT id, profile_image_filename
+        FROM users
+        WHERE id = %s AND role = 'registered'
+        """,
+        (user_id,),
+    )
+    user = cursor.fetchone()
+    if not user:
+        return None
+
+    filenames = []
+    if user.get('profile_image_filename'):
+        filenames.append(user['profile_image_filename'])
+
+    cursor.execute(
+        'SELECT id, image_filename FROM recipes WHERE user_id = %s',
+        (user_id,),
+    )
+    recipes = cursor.fetchall()
+    recipe_ids = [recipe['id'] for recipe in recipes]
+    filenames.extend(
+        recipe['image_filename'] for recipe in recipes if recipe.get('image_filename')
+    )
+
+    if recipe_ids:
+        placeholders = ','.join(['%s'] * len(recipe_ids))
+        cursor.execute(
+            f'UPDATE recipes SET original_recipe_id = NULL WHERE original_recipe_id IN ({placeholders})',
+            tuple(recipe_ids),
+        )
+        for table in RECIPE_CHILD_TABLES:
+            delete_rows_if_present(cursor, table, 'recipe_id', recipe_ids)
+        cursor.execute(
+            f'DELETE FROM recipes WHERE id IN ({placeholders})',
+            tuple(recipe_ids),
+        )
+
+    cursor.execute('DELETE FROM comments WHERE user_id = %s', (user_id,))
+    cursor.execute('DELETE FROM recipe_likes WHERE user_id = %s', (user_id,))
+    cursor.execute('DELETE FROM saved_recipes WHERE user_id = %s', (user_id,))
+
+    cursor.execute('SELECT id FROM collections WHERE user_id = %s', (user_id,))
+    collection_ids = [row['id'] for row in cursor.fetchall()]
+    delete_rows_if_present(cursor, 'collection_recipes', 'collection_id', collection_ids)
+    cursor.execute('DELETE FROM collections WHERE user_id = %s', (user_id,))
+    cursor.execute(
+        "DELETE FROM users WHERE id = %s AND role = 'registered'",
+        (user_id,),
+    )
+    return filenames
+
+
 def link_ingredient_to_allergies(cursor, ingredient_id, ingredient_name):
     cursor.execute("SELECT id, name FROM allergies")
     ingredient_words = {singular_word(word) for word in ingredient_name.lower().split()}
@@ -1121,6 +1214,119 @@ def unhide_comment(comment_id):
         conn.close()
     flash('Comment restored to public view.', 'success')
     return redirect(url_for('moderation_comments'))
+
+
+def require_moderator():
+    if 'user_id' not in session or session.get('user_role') != 'moderator':
+        flash('Only moderators can access moderation tools.', 'error')
+        return False
+    return True
+
+
+@app.route('/moderation/users')
+def moderation_users():
+    if not require_moderator():
+        return redirect(url_for('home'))
+
+    conn = get_db_connection()
+    users = []
+    if conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute(
+            """
+            SELECT users.id, users.full_name, users.email, users.is_suspended,
+                   users.created_at, COUNT(recipes.id) AS recipe_count
+            FROM users
+            LEFT JOIN recipes ON recipes.user_id = users.id
+            WHERE users.role = 'registered'
+            GROUP BY users.id, users.full_name, users.email, users.is_suspended,
+                     users.created_at
+            ORDER BY users.created_at DESC
+            """
+        )
+        users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    return render_template('moderation-users.html', users=users)
+
+
+def set_user_suspension(user_id, suspended):
+    if not require_moderator():
+        return redirect(url_for('home'))
+    if user_id == session.get('user_id'):
+        flash('You cannot change your own account from this page.', 'error')
+        return redirect(url_for('moderation_users'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('moderation_users'))
+
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE users
+        SET is_suspended = %s
+        WHERE id = %s AND role = 'registered'
+        """,
+        (suspended, user_id),
+    )
+    updated = cursor.rowcount
+    conn.commit()
+    cursor.close()
+    conn.close()
+    if updated:
+        flash(
+            'Account suspended.' if suspended else 'Account restored.',
+            'success',
+        )
+    else:
+        flash('That registered account was not found.', 'error')
+    return redirect(url_for('moderation_users'))
+
+
+@app.post('/moderation/users/<int:user_id>/suspend')
+def suspend_user(user_id):
+    return set_user_suspension(user_id, True)
+
+
+@app.post('/moderation/users/<int:user_id>/restore')
+def restore_user(user_id):
+    return set_user_suspension(user_id, False)
+
+
+@app.post('/moderation/users/<int:user_id>/delete')
+def delete_user(user_id):
+    if not require_moderator():
+        return redirect(url_for('home'))
+    if user_id == session.get('user_id'):
+        flash('You cannot remove your own account from this page.', 'error')
+        return redirect(url_for('moderation_users'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed.', 'error')
+        return redirect(url_for('moderation_users'))
+
+    cursor = conn.cursor(dictionary=True)
+    try:
+        filenames = delete_registered_user(cursor, user_id)
+        if filenames is None:
+            conn.rollback()
+            flash('That registered account was not found.', 'error')
+            return redirect(url_for('moderation_users'))
+        conn.commit()
+    except mysql.connector.Error:
+        conn.rollback()
+        flash('Unable to remove that account.', 'error')
+        return redirect(url_for('moderation_users'))
+    finally:
+        cursor.close()
+        conn.close()
+
+    remove_uploaded_files(filenames)
+    flash('Account removed.', 'success')
+    return redirect(url_for('moderation_users'))
 
 
 @app.route('/collections')

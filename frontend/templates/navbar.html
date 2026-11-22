@@ -32,7 +32,7 @@
       </li>
       {% if session.get('user_role') == 'moderator' %}
       <li class="item">
-        <a href="{{ url_for('moderation_comments') }}" class="nav_link {% if request.endpoint == 'moderation_comments' %}active{% endif %}">Moderation</a>
+        <a href="{{ url_for('moderation_comments') }}" class="nav_link {% if request.endpoint in ['moderation_comments', 'moderation_users'] %}active{% endif %}">Moderation</a>
       </li>
       {% endif %}
       <li class="item">
