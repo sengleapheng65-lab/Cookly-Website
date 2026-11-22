@@ -31,6 +31,8 @@
       .detail-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 34px; padding-top: 28px; border-top: 1px solid #e7dfd3; }
       .detail-columns h2 { color: #174f3a; font-family: "Fraunces", serif; font-size: 1.7rem; }
       .detail-text { white-space: pre-line; color: #56635c; line-height: 1.7; }
+      .ingredient-list { margin: 0; padding-left: 1.2rem; color: #56635c; line-height: 1.7; }
+      .ingredient-list li { margin: 0 0 6px; }
       .server-flash { margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: #e8f6ee; color: #174f3a; }
       .server-flash.error { background: #fdecea; color: #9c3b34; }
       .back-link { display: inline-block; margin-bottom: 20px; color: #1f5c42; font-weight: 700; text-decoration: none; }
@@ -123,7 +125,18 @@
           {% endif %}
           <p class="detail-description">{{ recipe.description }}</p>
           <div class="detail-columns">
-            <section><h2>Ingredients</h2><div class="detail-text">{{ recipe.ingredients }}</div></section>
+            <section>
+              <h2>Ingredients</h2>
+              {% if ingredient_lines %}
+              <ul class="ingredient-list">
+                {% for line in ingredient_lines %}
+                <li>{{ line }}</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <div class="detail-text">{{ recipe.ingredients }}</div>
+              {% endif %}
+            </section>
             <section><h2>Instructions</h2><div class="detail-text">{{ recipe.instructions }}</div></section>
           </div>
           <section class="comments-section" id="comments">

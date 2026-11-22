@@ -1,5 +1,6 @@
 # backend/app.py
 import os
+import re
 import uuid
 import mysql.connector
 from dotenv import load_dotenv
@@ -23,29 +24,150 @@ UPLOAD_DIR = os.path.join(STATIC_DIR, 'uploads')
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp'}
 
 
+INGREDIENT_UNITS = {
+    'cup', 'cups', 'tbsp', 'tbsps', 'tablespoon', 'tablespoons',
+    'tsp', 'tsps', 'teaspoon', 'teaspoons',
+    'oz', 'ounce', 'ounces', 'lb', 'lbs', 'pound', 'pounds',
+    'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms',
+    'ml', 'milliliter', 'milliliters', 'l', 'liter', 'liters',
+    'pinch', 'pinches', 'dash', 'dashes', 'clove', 'cloves',
+    'can', 'cans', 'package', 'packages', 'packet', 'packets',
+    'slice', 'slices', 'piece', 'pieces', 'bunch', 'bunches',
+    'sprig', 'sprigs',
+}
+FRACTION_CHARACTERS = {
+    '½': '1/2', '⅓': '1/3', '⅔': '2/3', '¼': '1/4', '¾': '3/4',
+    '⅛': '1/8', '⅜': '3/8', '⅝': '5/8', '⅞': '7/8',
+}
+QUANTITY_PATTERN = re.compile(r'^(?P<qty>\d+\s+\d+/\d+|\d+/\d+|\d+\.\d+|\d+)\s*(?P<rest>.*)$')
+DISPLAY_FRACTIONS = (
+    (0.125, '1/8'), (0.25, '1/4'), (0.33, '1/3'), (0.375, '3/8'),
+    (0.5, '1/2'), (0.67, '2/3'), (0.75, '3/4'), (0.875, '7/8'),
+)
+
+
+def decimal_quantity(raw_quantity):
+    raw_quantity = raw_quantity.strip()
+    if ' ' in raw_quantity:
+        whole, fraction = raw_quantity.split(None, 1)
+        numerator, denominator = fraction.split('/', 1)
+        return round(float(whole) + (float(numerator) / float(denominator)), 2)
+    if '/' in raw_quantity:
+        numerator, denominator = raw_quantity.split('/', 1)
+        return round(float(numerator) / float(denominator), 2)
+    return round(float(raw_quantity), 2)
+
+
+def parse_ingredient_line(line):
+    """Split '2 cups flour, sifted' into amount, unit, name, and note."""
+    text = line.strip().lstrip('-•*').strip()
+    for character, fraction in FRACTION_CHARACTERS.items():
+        text = text.replace(character, f' {fraction} ')
+    text = ' '.join(text.split())
+    if not text:
+        return None
+
+    quantity = None
+    unit = None
+    name = text
+    match = QUANTITY_PATTERN.match(text)
+    if match and match.group('rest').strip():
+        quantity = decimal_quantity(match.group('qty'))
+        rest = match.group('rest').strip()
+        pieces = rest.split(' ', 1)
+        maybe_unit = pieces[0].rstrip('.').lower()
+        if maybe_unit in INGREDIENT_UNITS and len(pieces) == 2:
+            unit = pieces[0].rstrip('.')
+            name = pieces[1].strip()
+        else:
+            name = rest
+
+    notes = None
+    if ',' in name:
+        ingredient_name, note = name.split(',', 1)
+        if ingredient_name.strip() and note.strip():
+            name = ingredient_name.strip()
+            notes = note.strip()[:255]
+    if not name:
+        return None
+    return {
+        'quantity': quantity,
+        'unit': unit[:40] if unit else None,
+        'name': name[:150],
+        'notes': notes,
+    }
+
+
+def format_quantity(quantity):
+    if quantity is None:
+        return None
+    number = float(quantity)
+    whole = int(number)
+    remainder = round(number - whole, 2)
+    fraction = next(
+        (label for value, label in DISPLAY_FRACTIONS if abs(remainder - value) < 0.02),
+        None,
+    )
+    if fraction and whole:
+        return f'{whole} {fraction}'
+    if fraction:
+        return fraction
+    if remainder == 0:
+        return str(whole)
+    return f'{number:.2f}'.rstrip('0').rstrip('.')
+
+
+def format_ingredient_line(row):
+    parts = []
+    quantity = format_quantity(row.get('quantity'))
+    if quantity:
+        parts.append(quantity)
+    if row.get('unit'):
+        parts.append(row['unit'])
+    name = row['name']
+    if row.get('notes'):
+        name = f"{name}, {row['notes']}"
+    parts.append(name)
+    return ' '.join(parts)
+
+
 def sync_structured_recipe_data(cursor, recipe_id, ingredients_text, instructions_text):
     """Keep normalized ingredient and instruction tables in sync with legacy form text."""
     cursor.execute('DELETE FROM recipe_ingredients WHERE recipe_id = %s', (recipe_id,))
     cursor.execute('DELETE FROM instruction_steps WHERE recipe_id = %s', (recipe_id,))
 
     ingredient_lines = [
-        line.strip().lstrip('-•*').strip()
-        for line in ingredients_text.splitlines()
-        if line.strip().lstrip('-•*').strip()
+        parsed
+        for parsed in (
+            parse_ingredient_line(line) for line in ingredients_text.splitlines()
+        )
+        if parsed
     ]
-    for ingredient_name in ingredient_lines:
+    for line_number, ingredient in enumerate(ingredient_lines, start=1):
         cursor.execute(
             'INSERT IGNORE INTO ingredients (name) VALUES (%s)',
-            (ingredient_name[:150],),
+            (ingredient['name'],),
         )
-        cursor.execute('SELECT id FROM ingredients WHERE name = %s', (ingredient_name[:150],))
-        ingredient = cursor.fetchone()
-        ingredient_id = ingredient[0] if not isinstance(ingredient, dict) else ingredient['id']
+        cursor.execute('SELECT id FROM ingredients WHERE name = %s', (ingredient['name'],))
+        ingredient_row = cursor.fetchone()
+        ingredient_id = ingredient_row[0] if not isinstance(ingredient_row, dict) else ingredient_row['id']
         cursor.execute(
-            'INSERT IGNORE INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (%s, %s)',
-            (recipe_id, ingredient_id),
+            """
+            INSERT INTO recipe_ingredients
+                (recipe_id, ingredient_id, quantity, unit, notes, line_number)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                quantity = VALUES(quantity),
+                unit = VALUES(unit),
+                notes = VALUES(notes),
+                line_number = VALUES(line_number)
+            """,
+            (
+                recipe_id, ingredient_id, ingredient['quantity'], ingredient['unit'],
+                ingredient['notes'], line_number,
+            ),
         )
-        link_ingredient_to_allergies(cursor, ingredient_id, ingredient_name)
+        link_ingredient_to_allergies(cursor, ingredient_id, ingredient['name'])
 
     instruction_lines = [line.strip() for line in instructions_text.splitlines() if line.strip()]
     for step_number, instruction in enumerate(instruction_lines, start=1):
@@ -1036,6 +1158,23 @@ def recipe_detail(recipe_id):
             (session['user_id'],),
         )
         user_collections = cursor.fetchall()
+    ingredient_lines = []
+    if recipe:
+        try:
+            cursor.execute(
+                """
+                SELECT ingredients.name, recipe_ingredients.quantity,
+                       recipe_ingredients.unit, recipe_ingredients.notes
+                FROM recipe_ingredients
+                JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id
+                WHERE recipe_ingredients.recipe_id = %s
+                ORDER BY recipe_ingredients.line_number, ingredients.name
+                """,
+                (recipe_id,),
+            )
+            ingredient_lines = [format_ingredient_line(row) for row in cursor.fetchall()]
+        except mysql.connector.Error:
+            ingredient_lines = []
     cursor.close()
     conn.close()
 
@@ -1049,6 +1188,7 @@ def recipe_detail(recipe_id):
         comments=comments,
         variations=variations,
         user_collections=user_collections,
+        ingredient_lines=ingredient_lines,
     )
 
 

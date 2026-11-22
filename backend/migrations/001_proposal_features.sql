@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
     quantity DECIMAL(10, 2) NULL,
     unit VARCHAR(40) NULL,
     notes VARCHAR(255) NULL,
+    line_number INT NOT NULL DEFAULT 1,
     PRIMARY KEY (recipe_id, ingredient_id),
     FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE,
     FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE RESTRICT
